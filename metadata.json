@@ -1,0 +1,6 @@
+{
+  "name": "Glitch - Social Video & Media Platform",
+  "description": "Unified social powerhouse combining visual feeds & stories, dynamic vertical sparks with sound remixing, and long-form cinema watch player.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
