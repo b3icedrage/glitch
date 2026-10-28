@@ -21,6 +21,7 @@ export const SoundHubModal: React.FC<SoundHubModalProps> = ({
 }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   if (!isOpen || !sound) return null;
 
@@ -28,6 +29,11 @@ export const SoundHubModal: React.FC<SoundHubModalProps> = ({
     (s) => s.soundTitle.toLowerCase().includes(sound.title.toLowerCase()) || sound.title.includes(s.soundTitle)
   );
   const displaySparks = relevantSparks.length > 0 ? relevantSparks : sparks.slice(0, 4);
+
+  const handleShare = () => {
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md select-none">
@@ -102,8 +108,12 @@ export const SoundHubModal: React.FC<SoundHubModalProps> = ({
           </button>
 
           <button
-            onClick={() => alert('Audio link copied!')}
-            className="p-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700/60"
+            onClick={handleShare}
+            className={`p-2.5 rounded-xl border transition-all ${
+              copied
+                ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-400'
+                : 'bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white border-slate-700/60'
+            }`}
             title="Share sound"
           >
             <Share2 className="w-4 h-4" />

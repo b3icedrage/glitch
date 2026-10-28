@@ -71,6 +71,12 @@ export const LiveStreamView: React.FC<LiveStreamViewProps> = ({
   const [cameraActive, setCameraActive] = useState(true);
   const [micActive, setMicActive] = useState(true);
   const [streamBitrate, setStreamBitrate] = useState(6420);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 2500);
+  };
 
   const activeStream = streams[activeStreamIndex] || streams[0];
   const chatBottomRef = useRef<HTMLDivElement>(null);
@@ -105,7 +111,7 @@ export const LiveStreamView: React.FC<LiveStreamViewProps> = ({
 
   const handleSendTip = (amount: number, tier: 'bolt' | 'matrix' | 'crown' | 'hyper', label: string) => {
     if ((currentUser.walletSparks ?? 2850) < amount) {
-      alert(`Insufficient Sparks! You need ${amount} Sparks.`);
+      showToast(`Insufficient Sparks! You need ${amount} Sparks.`);
       return;
     }
 
@@ -127,7 +133,13 @@ export const LiveStreamView: React.FC<LiveStreamViewProps> = ({
   };
 
   return (
-    <div className="w-full min-h-[calc(100vh-65px)] bg-[#07080c] flex flex-col select-none">
+    <div className="w-full min-h-[calc(100vh-65px)] bg-[#07080c] flex flex-col select-none relative">
+      {/* Toast */}
+      {toastMessage && (
+        <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-slate-900/95 border border-cyan-500/50 text-cyan-300 text-xs px-4 py-2 rounded-full shadow-2xl backdrop-blur-md animate-in fade-in slide-in-from-top-2">
+          {toastMessage}
+        </div>
+      )}
       
       {/* Sub-Header Navigation Rail */}
       <div className="bg-[#0b0d14] border-b border-slate-800/80 px-4 md:px-8 py-2.5 flex items-center justify-between">
@@ -425,7 +437,7 @@ export const LiveStreamView: React.FC<LiveStreamViewProps> = ({
               </button>
 
               <button
-                onClick={() => alert('Stream link copied to clipboard!')}
+                onClick={() => showToast('Stream link copied to clipboard!')}
                 className="p-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700/60 transition-colors"
                 title="Share stream"
               >

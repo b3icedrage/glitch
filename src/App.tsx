@@ -92,7 +92,7 @@ export default function App() {
   };
 
   const handlePayout = (amount: number) => {
-    showToast(`$${amount.toFixed(2)} transferred to your connected Stripe account! 🏦`);
+    showToast(`$${amount.toFixed(2)} transferred directly to Visa card 4987 0500 5177 9035! 💳`);
   };
 
   const handleOpenSoundHub = (soundTitle: string, soundArtist: string, soundCover: string) => {
