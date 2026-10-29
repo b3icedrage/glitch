@@ -364,6 +364,7 @@ export default function App() {
             onNavigateToSpark={() => handleSelectMode('sparks')}
             onNavigateToTube={() => handleSelectMode('tube')}
             onGoBack={() => handleSelectMode(previousMode || 'sparks')}
+            onChatsChange={setChats}
           />
         )}
 
