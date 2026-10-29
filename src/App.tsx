@@ -1,49 +1,56 @@
-import React, { useState } from 'react';
-import { 
-  PlatformMode, 
-  User, 
-  FeedPost, 
-  SparkReel, 
-  CinemaVideo, 
-  UserStory, 
+import React, { useState, useEffect } from 'react';
+import {
+  PlatformMode,
+  User,
+  FeedPost,
+  SparkReel,
+  CinemaVideo,
+  UserStory,
   ChatThread,
   GlitchNotification,
   LiveStream,
-  LiveChatMessage,
-  GlitchSound
+  GlitchSound,
+  Comment
 } from './types';
-import { 
-  CURRENT_USER, 
-  CREATORS, 
-  INITIAL_FEED_POSTS, 
-  INITIAL_SPARKS, 
-  INITIAL_CINEMA_VIDEOS, 
-  INITIAL_STORIES, 
+import {
+  CURRENT_USER,
+  CREATORS,
+  INITIAL_FEED_POSTS,
+  INITIAL_SPARKS,
+  INITIAL_CINEMA_VIDEOS,
+  INITIAL_STORIES,
   INITIAL_CHATS,
   INITIAL_NOTIFICATIONS,
   INITIAL_LIVE_STREAMS,
   INITIAL_LIVE_CHATS,
   INITIAL_SOUNDS
 } from './data/mockData';
+
+// Core TikTok / Social Views
 import { Header } from './components/Header';
 import { BottomNav } from './components/BottomNav';
-import { FeedView } from './components/FeedView';
 import { SparksView } from './components/SparksView';
-import { CinemaView } from './components/CinemaView';
+import { FeedView } from './components/FeedView';
 import { LiveStreamView } from './components/LiveStreamView';
 import { ExploreView } from './components/ExploreView';
+import { CinemaView } from './components/CinemaView';
 import { DirectMessages } from './components/DirectMessages';
 import { ProfileView } from './components/ProfileView';
-import { StoryViewerModal } from './components/StoryViewerModal';
-import { CommentsDrawer } from './components/CommentsDrawer';
+
+// Interactive Drawers & Modals
 import { CreateModal } from './components/CreateModal';
+import { CommentsDrawer } from './components/CommentsDrawer';
 import { NotificationsDrawer } from './components/NotificationsDrawer';
-import { WalletModal } from './components/WalletModal';
+import { StoryViewerModal } from './components/StoryViewerModal';
 import { SoundHubModal } from './components/SoundHubModal';
+import { KelviqPricingModal } from './components/KelviqPricingModal';
 
 export default function App() {
-  const [currentMode, setCurrentMode] = useState<PlatformMode>('feed');
-  const [historyStack, setHistoryStack] = useState<PlatformMode[]>([]);
+  // Navigation State (defaults to TikTok 'sparks' video feed)
+  const [currentMode, setCurrentMode] = useState<PlatformMode>('sparks');
+  const [previousMode, setPreviousMode] = useState<PlatformMode>('sparks');
+
+  // Application Data State
   const [currentUser, setCurrentUser] = useState<User>(CURRENT_USER);
   const [feedPosts, setFeedPosts] = useState<FeedPost[]>(INITIAL_FEED_POSTS);
   const [sparks, setSparks] = useState<SparkReel[]>(INITIAL_SPARKS);
@@ -51,374 +58,387 @@ export default function App() {
   const [stories, setStories] = useState<UserStory[]>(INITIAL_STORIES);
   const [chats, setChats] = useState<ChatThread[]>(INITIAL_CHATS);
   const [notifications, setNotifications] = useState<GlitchNotification[]>(INITIAL_NOTIFICATIONS);
-  const [liveStreams, setLiveStreams] = useState<LiveStream[]>(INITIAL_LIVE_STREAMS);
-  const [liveChats, setLiveChats] = useState<LiveChatMessage[]>(INITIAL_LIVE_CHATS);
+  const [liveStreams] = useState<LiveStream[]>(INITIAL_LIVE_STREAMS);
 
-  // Cross-Platform Follow & Subscribe State
-  const [followedUserIds, setFollowedUserIds] = useState<Set<string>>(new Set(['user_kai']));
-  const [subscribedChannelIds, setSubscribedChannelIds] = useState<Set<string>>(new Set(['user_kai']));
+  // Social Connections & Subscriptions
+  const [followedUserIds, setFollowedUserIds] = useState<Set<string>>(new Set(['user_kai', 'user_elena']));
+  const [subscribedChannelIds, setSubscribedChannelIds] = useState<Set<string>>(new Set(['user_elena']));
 
-  // Active Modals & Viewers
-  const [activeStoryIndex, setActiveStoryIndex] = useState<number | null>(null);
-  const [activeCommentsItem, setActiveCommentsItem] = useState<{
-    type: 'feed' | 'spark';
-    item: FeedPost | SparkReel;
-  } | null>(null);
+  // Modals & Drawers State
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [isCommentsOpen, setIsCommentsOpen] = useState(false);
+  const [activeCommentsItem, setActiveCommentsItem] = useState<{ id: string; title: string; comments: Comment[] } | null>(null);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
-  const [isWalletOpen, setIsWalletOpen] = useState(false);
-  const [activeSoundForHub, setActiveSoundForHub] = useState<GlitchSound | null>(null);
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [isStoryViewerOpen, setIsStoryViewerOpen] = useState(false);
+  const [selectedStoryIndex, setSelectedStoryIndex] = useState(0);
+  const [isSoundHubOpen, setIsSoundHubOpen] = useState(false);
+  const [activeSound, setActiveSound] = useState<GlitchSound | null>(null);
 
-  const showToast = (msg: string) => {
-    setToastMessage(msg);
-    setTimeout(() => setToastMessage(null), 2500);
-  };
+  // Kelviq Billing State
+  const [isPricingOpen, setIsPricingOpen] = useState(false);
+  const [isPro, setIsPro] = useState(false);
+  const [billingToast, setBillingToast] = useState<string | null>(null);
 
-  const handleTipCreator = (amount: number, streamerId: string) => {
-    setCurrentUser(prev => ({
-      ...prev,
-      walletSparks: Math.max(0, (prev.walletSparks ?? 2850) - amount)
-    }));
-    showToast(`Tipped ${amount.toLocaleString()} Super-Sparks! ⚡`);
-  };
-
-  const handleAddSparks = (amount: number) => {
-    setCurrentUser(prev => ({
-      ...prev,
-      walletSparks: (prev.walletSparks ?? 2850) + amount
-    }));
-    showToast(`Added +${amount.toLocaleString()} Sparks to your wallet! ⚡`);
-  };
-
-  const handlePayout = (amount: number) => {
-    showToast(`$${amount.toFixed(2)} transferred directly to Visa card 4987 0500 5177 9035! 💳`);
-  };
-
-  const handleOpenSoundHub = (soundTitle: string, soundArtist: string, soundCover: string) => {
-    const existing = INITIAL_SOUNDS.find(s => s.title.toLowerCase().includes(soundTitle.toLowerCase()));
-    if (existing) {
-      setActiveSoundForHub(existing);
-    } else {
-      setActiveSoundForHub({
-        id: `sound_${Date.now()}`,
-        title: soundTitle,
-        artist: soundArtist,
-        coverUrl: soundCover,
-        duration: '0:30',
-        usageCount: '1.2K',
-        category: 'Original Audio'
-      });
+  // Fetch live Kelviq entitlements & check URL params
+  useEffect(() => {
+    if (window.location.search.includes('billing=success')) {
+      setBillingToast('🎉 Payment Successful! Your Kelviq Pro Pass has been activated.');
+      window.history.replaceState({}, document.title, window.location.pathname);
+      setTimeout(() => setBillingToast(null), 5000);
     }
+
+    fetch('/api/kelviq/entitlements')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.isPro) {
+          setIsPro(true);
+        }
+      })
+      .catch((err) => console.warn('Could not fetch entitlements:', err));
+  }, []);
+
+  const handleSelectMode = (mode: PlatformMode) => {
+    setPreviousMode(currentMode);
+    setCurrentMode(mode);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleMarkAllNotificationsRead = () => {
-    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
-    showToast('All notifications marked as read! ✓');
-  };
-
-  const handleSelectNotification = (notif: GlitchNotification) => {
-    setNotifications(prev => prev.map(n => (n.id === notif.id ? { ...n, read: true } : n)));
-    setIsNotificationsOpen(false);
-    if (notif.targetType === 'spark') {
-      navigateWithHistory('sparks');
-    } else if (notif.targetType === 'tube') {
-      navigateWithHistory('tube');
-    } else if (notif.targetType === 'live') {
-      navigateWithHistory('live');
-    } else {
-      navigateWithHistory('feed');
-    }
-  };
-
-  const navigateWithHistory = (newMode: PlatformMode) => {
-    if (newMode !== currentMode) {
-      setHistoryStack(prev => [...prev, currentMode]);
-      setCurrentMode(newMode);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-  };
-
-  const handleGoBack = () => {
-    if (historyStack.length > 0) {
-      const prevMode = historyStack[historyStack.length - 1];
-      setHistoryStack(prev => prev.slice(0, -1));
-      setCurrentMode(prevMode);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    } else {
-      setCurrentMode('feed');
-    }
-  };
-
+  // Follow/Unfollow toggle
   const handleToggleFollow = (userId: string) => {
-    setFollowedUserIds(prev => {
+    setFollowedUserIds((prev) => {
       const next = new Set(prev);
       if (next.has(userId)) {
         next.delete(userId);
-        showToast('Unfollowed creator');
       } else {
         next.add(userId);
-        showToast('Now following on Glitch!');
       }
       return next;
     });
   };
 
+  // Channel Subscribe toggle
   const handleToggleSubscribe = (channelId: string) => {
-    setSubscribedChannelIds(prev => {
+    setSubscribedChannelIds((prev) => {
       const next = new Set(prev);
       if (next.has(channelId)) {
         next.delete(channelId);
-        showToast('Unsubscribed from channel');
       } else {
         next.add(channelId);
-        showToast('Subscribed to channel with notifications enabled!');
       }
       return next;
     });
   };
 
-  const handleStoryViewed = (userId: string) => {
-    setStories(prev =>
-      prev.map(s => (s.userId === userId ? { ...s, hasUnseen: false } : s))
+  // Open comments for reel or feed post
+  const handleOpenComments = (item: SparkReel | FeedPost) => {
+    setActiveCommentsItem({
+      id: item.id,
+      title: 'caption' in item ? item.caption : 'Comments',
+      comments: item.comments || [],
+    });
+    setIsCommentsOpen(true);
+  };
+
+  // Add new comment
+  const handleAddComment = (text: string) => {
+    if (!activeCommentsItem) return;
+    const newComment: Comment = {
+      id: `comm_${Date.now()}`,
+      user: currentUser,
+      text,
+      timestamp: 'Just now',
+      likesCount: 0,
+      isLiked: false,
+    };
+
+    setActiveCommentsItem((prev) => (prev ? { ...prev, comments: [newComment, ...prev.comments] } : null));
+
+    // Update inside sparks or feed
+    setSparks((prev) =>
+      prev.map((s) => (s.id === activeCommentsItem.id ? { ...s, comments: [newComment, ...s.comments], commentsCount: s.commentsCount + 1 } : s))
+    );
+    setFeedPosts((prev) =>
+      prev.map((p) => (p.id === activeCommentsItem.id ? { ...p, comments: [newComment, ...p.comments], commentsCount: p.commentsCount + 1 } : p))
     );
   };
 
-  // Publishing Handlers from Creation Studio
-  const handlePublishFeedPost = (newPost: FeedPost) => {
-    setFeedPosts([newPost, ...feedPosts]);
-    navigateWithHistory('feed');
-    showToast('Feed post published successfully! 📸');
+  // Open Sound Hub from Sparks Reel audio tag
+  const handleOpenSoundHub = (title: string, artist: string, cover: string) => {
+    const existing = INITIAL_SOUNDS.find((s) => s.title.toLowerCase() === title.toLowerCase());
+    const soundObj: GlitchSound = existing || {
+      id: `sound_${Date.now()}`,
+      title,
+      artist,
+      coverUrl: cover,
+      duration: '0:30',
+      usageCount: '14.2K',
+      category: 'Trending Beat',
+    };
+    setActiveSound(soundObj);
+    setIsSoundHubOpen(true);
   };
 
+  // Publishing new content
   const handlePublishSpark = (newSpark: SparkReel) => {
-    setSparks([newSpark, ...sparks]);
-    navigateWithHistory('sparks');
-    showToast('Spark reel dropped to Glitch algorithm! ⚡');
+    setSparks((prev) => [newSpark, ...prev]);
+    setCurrentMode('sparks');
+  };
+
+  const handlePublishFeedPost = (newPost: FeedPost) => {
+    setFeedPosts((prev) => [newPost, ...prev]);
+    setCurrentMode('feed');
   };
 
   const handlePublishCinemaVideo = (newVideo: CinemaVideo) => {
-    setCinemaVideos([newVideo, ...cinemaVideos]);
-    navigateWithHistory('tube');
-    showToast('Cinema episode uploaded to Glitch Cinema! 🎬');
+    setCinemaVideos((prev) => [newVideo, ...prev]);
+    setCurrentMode('tube');
   };
 
   const handlePublishStory = (newStory: UserStory) => {
-    setStories([newStory, ...stories.filter(s => s.userId !== currentUser.id)]);
-    showToast('Story added for the next 24 hours! ⭕');
+    setStories((prev) => [newStory, ...prev]);
   };
 
+  // Tipping creator in LIVE stream (reports compute/meter usage if Pro)
+  const handleTipCreator = (amount: number, _streamerId: string) => {
+    setCurrentUser((prev) => ({
+      ...prev,
+      walletSparks: Math.max(0, (prev.walletSparks || 0) - amount),
+    }));
+
+    // Report usage to Kelviq if active
+    fetch('/api/kelviq/report-usage', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ credits: Math.ceil(amount / 10) }),
+    }).catch(() => {});
+  };
+
+  const unreadNotificationsCount = notifications.filter((n) => !n.read).length;
   const unreadMessagesCount = chats.reduce((acc, c) => acc + (c.unreadCount || 0), 0);
-  const previousMode = historyStack.length > 0 ? historyStack[historyStack.length - 1] : undefined;
 
   return (
-    <div className="min-h-screen bg-[#090a0f] text-slate-100 flex flex-col font-['Plus_Jakarta_Sans'] pb-20 md:pb-0">
+    <div className="min-h-screen bg-[#07080d] text-slate-100 flex flex-col font-['Plus_Jakarta_Sans'] selection:bg-cyan-500 selection:text-black">
       
-      {/* Toast Alert */}
-      {toastMessage && (
-        <div className="fixed top-16 left-1/2 -translate-x-1/2 z-50 bg-slate-900 border border-cyan-500/50 text-cyan-300 text-xs px-4 py-2.5 rounded-full shadow-2xl backdrop-blur-md animate-in fade-in zoom-in-95 duration-150">
-          {toastMessage}
+      {/* Top Header */}
+      <Header
+        currentMode={currentMode}
+        onSelectMode={handleSelectMode}
+        currentUser={currentUser}
+        onOpenCreate={() => setIsCreateOpen(true)}
+        onOpenNotifications={() => setIsNotificationsOpen(true)}
+        onOpenPricing={() => setIsPricingOpen(true)}
+        isPro={isPro}
+        unreadNotificationsCount={unreadNotificationsCount}
+        unreadMessagesCount={unreadMessagesCount}
+      />
+
+      {/* Kelviq Billing Toast */}
+      {billingToast && (
+        <div className="bg-gradient-to-r from-emerald-600 to-cyan-600 text-white font-mono text-xs py-2 px-4 text-center font-bold sticky top-[57px] z-30 shadow-lg animate-fade-in flex items-center justify-center gap-2">
+          <span>{billingToast}</span>
+          <button
+            onClick={() => setBillingToast(null)}
+            className="ml-3 text-emerald-200 hover:text-white underline text-[11px]"
+          >
+            Close
+          </button>
         </div>
       )}
 
-      {/* Strict 3-Zone Top Navigation Contract with Persistent Back Arrow */}
-      <Header
-        currentMode={currentMode}
-        onSelectMode={(mode) => navigateWithHistory(mode)}
-        currentUser={currentUser}
-        onOpenCreate={() => setIsCreateOpen(true)}
-        unreadCount={unreadMessagesCount}
-        unreadNotificationsCount={notifications.filter(n => !n.read).length}
-        onOpenNotifications={() => setIsNotificationsOpen(true)}
-        onOpenWallet={() => setIsWalletOpen(true)}
-        canGoBack={historyStack.length > 0}
-        onGoBack={handleGoBack}
-        previousModeLabel={previousMode}
-      />
+      {/* Main Viewport Content */}
+      <main className="flex-1 flex flex-col pb-16 md:pb-0">
+        
+        {/* TikTok Vertical Video Sparks Feed */}
+        {currentMode === 'sparks' && (
+          <SparksView
+            reels={sparks}
+            currentUser={currentUser}
+            onOpenComments={handleOpenComments}
+            onToggleFollow={handleToggleFollow}
+            followedUserIds={followedUserIds}
+            onOpenSoundHub={handleOpenSoundHub}
+          />
+        )}
 
-      {/* Main Mode View Routing */}
-      <main className="flex-1 w-full">
+        {/* Instagram/TikTok Following Feed with Stories Bar */}
         {currentMode === 'feed' && (
           <FeedView
             posts={feedPosts}
             stories={stories}
             currentUser={currentUser}
             creators={CREATORS}
-            onSelectStory={(idx) => setActiveStoryIndex(idx)}
+            onSelectStory={(index) => {
+              setSelectedStoryIndex(index);
+              setIsStoryViewerOpen(true);
+            }}
             onAddStory={() => setIsCreateOpen(true)}
-            onOpenComments={(post) => setActiveCommentsItem({ type: 'feed', item: post })}
-            onNavigateToSparks={() => navigateWithHistory('sparks')}
-            onNavigateToTube={() => navigateWithHistory('tube')}
-            onNavigateToMessages={(creatorId) => navigateWithHistory('messages')}
+            onOpenComments={handleOpenComments}
+            onNavigateToSparks={() => handleSelectMode('sparks')}
+            onNavigateToTube={() => handleSelectMode('tube')}
+            onNavigateToMessages={() => handleSelectMode('messages')}
             onToggleFollow={handleToggleFollow}
             followedUserIds={followedUserIds}
           />
         )}
 
-        {currentMode === 'sparks' && (
-          <SparksView
-            reels={sparks}
+        {/* TikTok LIVE Interactive Stream with Live Chat & Gifts */}
+        {currentMode === 'live' && (
+          <LiveStreamView
+            streams={liveStreams}
+            initialChatMessages={INITIAL_LIVE_CHATS}
             currentUser={currentUser}
-            onOpenComments={(reel) => setActiveCommentsItem({ type: 'spark', item: reel })}
-            onToggleFollow={handleToggleFollow}
-            followedUserIds={followedUserIds}
-            onGoBack={handleGoBack}
-            onOpenSoundHub={handleOpenSoundHub}
+            onGoBack={() => handleSelectMode(previousMode || 'sparks')}
+            onTipCreator={handleTipCreator}
           />
         )}
 
+        {/* TikTok Explore / Search / Trending Hub */}
+        {currentMode === 'explore' && (
+          <ExploreView
+            feedPosts={feedPosts}
+            sparks={sparks}
+            cinemaVideos={cinemaVideos}
+            onSelectFeedPost={(post) => {
+              setFeedPosts([post, ...feedPosts.filter((p) => p.id !== post.id)]);
+              handleSelectMode('feed');
+            }}
+            onSelectSpark={(spark) => {
+              setSparks([spark, ...sparks.filter((s) => s.id !== spark.id)]);
+              handleSelectMode('sparks');
+            }}
+            onSelectVideo={(video) => {
+              setCinemaVideos([video, ...cinemaVideos.filter((v) => v.id !== video.id)]);
+              handleSelectMode('tube');
+            }}
+            onGoBack={() => handleSelectMode(previousMode || 'sparks')}
+          />
+        )}
+
+        {/* TikTok Long-Form Video / Cinema */}
         {currentMode === 'tube' && (
           <CinemaView
             videos={cinemaVideos}
             currentUser={currentUser}
             onToggleSubscribe={handleToggleSubscribe}
             subscribedChannelIds={subscribedChannelIds}
-            onGoBack={handleGoBack}
+            onGoBack={() => handleSelectMode(previousMode || 'sparks')}
           />
         )}
 
-        {currentMode === 'live' && (
-          <LiveStreamView
-            streams={liveStreams}
-            initialChatMessages={liveChats}
-            currentUser={currentUser}
-            onGoBack={handleGoBack}
-            onTipCreator={handleTipCreator}
-          />
-        )}
-
-        {currentMode === 'explore' && (
-          <ExploreView
-            feedPosts={feedPosts}
-            sparks={sparks}
-            cinemaVideos={cinemaVideos}
-            onSelectFeedPost={(post) => navigateWithHistory('feed')}
-            onSelectSpark={(spark) => navigateWithHistory('sparks')}
-            onSelectVideo={(video) => navigateWithHistory('tube')}
-            onGoBack={handleGoBack}
-          />
-        )}
-
+        {/* Direct Messages & Chat Inbox */}
         {currentMode === 'messages' && (
           <DirectMessages
             chats={chats}
             currentUser={currentUser}
-            onNavigateToFeedPost={(postId) => navigateWithHistory('feed')}
-            onNavigateToSpark={(sparkId) => navigateWithHistory('sparks')}
-            onNavigateToTube={(tubeId) => navigateWithHistory('tube')}
-            onGoBack={handleGoBack}
+            onNavigateToFeedPost={() => handleSelectMode('feed')}
+            onNavigateToSpark={() => handleSelectMode('sparks')}
+            onNavigateToTube={() => handleSelectMode('tube')}
+            onGoBack={() => handleSelectMode(previousMode || 'sparks')}
           />
         )}
 
+        {/* User Creator Profile */}
         {currentMode === 'profile' && (
           <ProfileView
             currentUser={currentUser}
-            onUpdateUser={(updated) => setCurrentUser(prev => ({ ...prev, ...updated }))}
-            userPosts={feedPosts.filter(p => p.author.id === currentUser.id || p.id === 'post_1')}
-            userSparks={sparks.filter(s => s.author.id === currentUser.id || s.id === 'spark_1')}
-            userVideos={cinemaVideos.filter(v => v.channel.id === currentUser.id || v.id === 'yt_4')}
-            onSelectPost={(post) => navigateWithHistory('feed')}
-            onSelectSpark={(spark) => navigateWithHistory('sparks')}
-            onSelectVideo={(video) => navigateWithHistory('tube')}
-            onNavigateToMessages={() => navigateWithHistory('messages')}
-            onGoBack={handleGoBack}
+            onUpdateUser={(updated) => setCurrentUser((prev) => ({ ...prev, ...updated }))}
+            userPosts={feedPosts.filter((p) => p.author.id === currentUser.id || p.author.handle === currentUser.handle)}
+            userSparks={sparks.filter((s) => s.author.id === currentUser.id || s.author.handle === currentUser.handle)}
+            userVideos={cinemaVideos.filter((v) => v.channel.id === currentUser.id || v.channel.handle === currentUser.handle)}
+            onSelectPost={() => handleSelectMode('feed')}
+            onSelectSpark={() => handleSelectMode('sparks')}
+            onSelectVideo={() => handleSelectMode('tube')}
+            onNavigateToMessages={() => handleSelectMode('messages')}
+            onGoBack={() => handleSelectMode(previousMode || 'sparks')}
           />
         )}
+
       </main>
 
-      {/* Mobile Ergonomic Bottom Tab Bar */}
+      {/* Mobile Bottom Navigation Bar */}
       <BottomNav
         currentMode={currentMode}
-        onSelectMode={(mode) => navigateWithHistory(mode)}
+        onSelectMode={handleSelectMode}
         onOpenCreate={() => setIsCreateOpen(true)}
         currentUser={currentUser}
         unreadCount={unreadMessagesCount}
       />
 
-      {/* Full-Screen Story Viewer Modal */}
-      {activeStoryIndex !== null && (
-        <StoryViewerModal
-          stories={stories}
-          initialUserIndex={activeStoryIndex}
-          onClose={() => setActiveStoryIndex(null)}
-          onStoryViewed={handleStoryViewed}
-        />
-      )}
+      {/* Modals & Slide-Over Drawers */}
 
-      {/* Slide-over Comments Drawer (for feed posts and sparks reels) */}
-      {activeCommentsItem && (
-        <CommentsDrawer
-          isOpen={true}
-          onClose={() => setActiveCommentsItem(null)}
-          comments={activeCommentsItem.item.comments}
-          currentUser={currentUser}
-          onAddComment={(text) => {
-            if (activeCommentsItem.type === 'feed') {
-              setFeedPosts(prev =>
-                prev.map(p =>
-                  p.id === activeCommentsItem.item.id
-                    ? { ...p, commentsCount: p.commentsCount + 1 }
-                    : p
-                )
-              );
-            } else {
-              setSparks(prev =>
-                prev.map(s =>
-                  s.id === activeCommentsItem.item.id
-                    ? { ...s, commentsCount: s.commentsCount + 1 }
-                    : s
-                )
-              );
-            }
-          }}
-          title={activeCommentsItem.type === 'feed' ? 'Post Comments' : 'Sparks Discussion'}
-        />
-      )}
-
-      {/* Multi-Platform Creator Studio Modal */}
+      {/* 1. TikTok Video Creation Studio */}
       <CreateModal
         isOpen={isCreateOpen}
         onClose={() => setIsCreateOpen(false)}
         currentUser={currentUser}
-        onPublishFeedPost={handlePublishFeedPost}
         onPublishSpark={handlePublishSpark}
+        onPublishFeedPost={handlePublishFeedPost}
         onPublishCinemaVideo={handlePublishCinemaVideo}
         onPublishStory={handlePublishStory}
       />
 
-      {/* Notifications Drawer */}
+      {/* 2. TikTok Sliding Comments Drawer */}
+      <CommentsDrawer
+        isOpen={isCommentsOpen}
+        onClose={() => setIsCommentsOpen(false)}
+        comments={activeCommentsItem?.comments || []}
+        currentUser={currentUser}
+        onAddComment={handleAddComment}
+        title={activeCommentsItem?.title || 'Comments'}
+      />
+
+      {/* 3. Notifications Drawer */}
       <NotificationsDrawer
         isOpen={isNotificationsOpen}
         onClose={() => setIsNotificationsOpen(false)}
         notifications={notifications}
-        onMarkAllRead={handleMarkAllNotificationsRead}
-        onSelectNotification={handleSelectNotification}
+        onMarkAllRead={() => setNotifications((prev) => prev.map((n) => ({ ...n, read: true })))}
+        onSelectNotification={(notif) => {
+          setNotifications((prev) => prev.map((n) => (n.id === notif.id ? { ...n, read: true } : n)));
+          setIsNotificationsOpen(false);
+          if (notif.targetType === 'spark') handleSelectMode('sparks');
+          else if (notif.targetType === 'feed') handleSelectMode('feed');
+          else if (notif.targetType === 'live') handleSelectMode('live');
+        }}
         currentUser={currentUser}
       />
 
-      {/* Virtual Currency & Glitch Sparks Wallet */}
-      <WalletModal
-        isOpen={isWalletOpen}
-        onClose={() => setIsWalletOpen(false)}
-        currentUser={currentUser}
-        onAddSparks={handleAddSparks}
-        onPayout={handlePayout}
-      />
+      {/* 4. Fullscreen TikTok Stories Viewer */}
+      {isStoryViewerOpen && (
+        <StoryViewerModal
+          stories={stories}
+          initialUserIndex={selectedStoryIndex}
+          onClose={() => setIsStoryViewerOpen(false)}
+          onStoryViewed={(userId) => {
+            setStories((prev) => prev.map((s) => (s.userId === userId ? { ...s, hasUnseen: false } : s)));
+          }}
+        />
+      )}
 
-      {/* Audio Hub Modal */}
-      <SoundHubModal
-        isOpen={activeSoundForHub !== null}
-        onClose={() => setActiveSoundForHub(null)}
-        sound={activeSoundForHub}
-        sparks={sparks}
-        onSelectSpark={(spark) => {
-          setActiveSoundForHub(null);
-          navigateWithHistory('sparks');
-        }}
-        onUseSoundInStudio={(sound) => {
-          setActiveSoundForHub(null);
-          setIsCreateOpen(true);
-        }}
+      {/* 5. Trending TikTok Sound Hub Modal */}
+      {isSoundHubOpen && (
+        <SoundHubModal
+          isOpen={isSoundHubOpen}
+          onClose={() => setIsSoundHubOpen(false)}
+          sound={activeSound}
+          sparks={sparks}
+          onSelectSpark={(spark) => {
+            setIsSoundHubOpen(false);
+            setSparks([spark, ...sparks.filter((s) => s.id !== spark.id)]);
+            handleSelectMode('sparks');
+          }}
+          onUseSoundInStudio={() => {
+            setIsSoundHubOpen(false);
+            setIsCreateOpen(true);
+          }}
+        />
+      )}
+
+      {/* 6. Kelviq Live Production Billing Modal */}
+      <KelviqPricingModal
+        isOpen={isPricingOpen}
+        onClose={() => setIsPricingOpen(false)}
+        isPro={isPro}
       />
 
     </div>

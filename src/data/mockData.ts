@@ -378,7 +378,7 @@ export const INITIAL_SPARKS: SparkReel[] = [
 
 export const INITIAL_CINEMA_VIDEOS: CinemaVideo[] = [
   {
-    id: 'yt_1',
+    id: 'cinema_1',
     title: 'Building the Ultimate Cyberpunk Workspace: Custom Silicon, OLEDs & Acoustic Tuning',
     description: `In this comprehensive build guide, we design, fabricate, and assemble an uncompromising creator environment from scratch.\n\nTimestamps:\n0:00 - The Vision & Philosophy\n2:15 - Desk Fabrication & Solid Walnut\n5:40 - Display Setup: Dual 32" QD-OLEDs\n10:12 - Custom Audio Rig & Analog Routing\n15:30 - Final Sound Demo & Cable Management\n\nThanks to our community supporters on Glitch! Subscribe for weekly engineering documentaries.`,
     videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
@@ -396,7 +396,7 @@ export const INITIAL_CINEMA_VIDEOS: CinemaVideo[] = [
     commentsCount: 1840,
     comments: [
       {
-        id: 'ytc_1',
+        id: 'cc_1',
         user: CURRENT_USER,
         text: 'The acoustic paneling in the background makes a massive difference in vocal clarity. Top notch production value!',
         timestamp: '2 days ago',
@@ -405,7 +405,7 @@ export const INITIAL_CINEMA_VIDEOS: CinemaVideo[] = [
         isLiked: true
       },
       {
-        id: 'ytc_2',
+        id: 'cc_2',
         user: CREATORS.kai,
         text: 'That walnut desk slab is perfection. Where did you source the wood?',
         timestamp: '1 day ago',
@@ -415,7 +415,7 @@ export const INITIAL_CINEMA_VIDEOS: CinemaVideo[] = [
     ]
   },
   {
-    id: 'yt_2',
+    id: 'cinema_2',
     title: 'Tokyo 2099: Cyberpunk City Documentary in 4K 60FPS Anamorphic Cinema',
     description: `An immersive journey through the high-density districts of Shinjuku, Akihabara, and Shibuya after midnight rain. Shot on custom cinema anamorphic primes.\n\nAll music produced in-house on modular analog synthesizers.\n\nStream the full soundtrack on Glitch Audio.`,
     videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4',
@@ -433,7 +433,7 @@ export const INITIAL_CINEMA_VIDEOS: CinemaVideo[] = [
     commentsCount: 4120,
     comments: [
       {
-        id: 'ytc_3',
+        id: 'cc_3',
         user: CREATORS.elena,
         text: 'Watched this on my OLED TV in the dark. Felt like a portal straight to another dimension.',
         timestamp: '4 days ago',
@@ -443,7 +443,7 @@ export const INITIAL_CINEMA_VIDEOS: CinemaVideo[] = [
     ]
   },
   {
-    id: 'yt_3',
+    id: 'cinema_3',
     title: 'World Championship Street Dance Routine: Behind The Scenes & Full Choreography',
     description: `Breakdown of our 1st place performance at the Global Street Session in Seoul. Includes multi-cam angles, slow-motion breakdowns, and dancer audio commentary.`,
     videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
@@ -461,7 +461,7 @@ export const INITIAL_CINEMA_VIDEOS: CinemaVideo[] = [
     commentsCount: 940,
     comments: [
       {
-        id: 'ytc_4',
+        id: 'cc_4',
         user: CREATORS.neon,
         text: 'That synchronized freeze at 4:20 was unreal!',
         timestamp: '1 week ago',
@@ -470,7 +470,7 @@ export const INITIAL_CINEMA_VIDEOS: CinemaVideo[] = [
     ]
   },
   {
-    id: 'yt_4',
+    id: 'cinema_4',
     title: 'Designing Reactive Digital Identities: UI/UX Masterclass for Modern Web Apps',
     description: `How to blend the visual punch of social media with production web architecture. Motion design, zero-pill typography, and buttery 60fps canvas performance.`,
     videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
@@ -681,7 +681,7 @@ export const INITIAL_NOTIFICATIONS: GlitchNotification[] = [
     type: 'comment',
     actor: CREATORS.neon,
     content: 'commented: "That mechanical switch actuation curve is pristine."',
-    targetId: 'yt_3',
+    targetId: 'cinema_3',
     targetType: 'tube',
     targetThumbnail: '/src/assets/images/glitch_tech_desk_1793019176039.jpg',
     timestamp: '2h ago',

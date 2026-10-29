@@ -1,19 +1,30 @@
 import React from 'react';
 import { PlatformMode, User } from '../types';
-import { Sparkles, Compass, MessageCircle, PlaySquare, Plus, Bell, Flame, ArrowLeft, Radio, Zap } from 'lucide-react';
+import {
+  Flame,
+  Home,
+  Compass,
+  Radio,
+  MessageCircle,
+  Bell,
+  Plus,
+  Zap,
+  Search,
+  Sparkles,
+  CreditCard,
+  Crown
+} from 'lucide-react';
 
 interface HeaderProps {
   currentMode: PlatformMode;
   onSelectMode: (mode: PlatformMode) => void;
   currentUser: User;
   onOpenCreate: () => void;
-  unreadCount?: number;
+  onOpenNotifications: () => void;
+  onOpenPricing: () => void;
+  isPro?: boolean;
   unreadNotificationsCount?: number;
-  onOpenNotifications?: () => void;
-  onOpenWallet?: () => void;
-  canGoBack?: boolean;
-  onGoBack?: () => void;
-  previousModeLabel?: string;
+  unreadMessagesCount?: number;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -21,213 +32,169 @@ export const Header: React.FC<HeaderProps> = ({
   onSelectMode,
   currentUser,
   onOpenCreate,
-  unreadCount = 1,
-  unreadNotificationsCount = 3,
   onOpenNotifications,
-  onOpenWallet,
-  canGoBack = false,
-  onGoBack,
-  previousModeLabel
+  onOpenPricing,
+  isPro = false,
+  unreadNotificationsCount = 3,
+  unreadMessagesCount = 2,
 }) => {
   return (
-    <header className="sticky top-0 z-40 bg-[#090a0f]/95 backdrop-blur-md border-b border-slate-800/80 px-4 md:px-8 py-3 transition-colors">
-      <div className="max-w-7xl mx-auto flex items-center justify-between gap-4 md:gap-8">
+    <header className="sticky top-0 z-40 bg-[#07080d]/95 backdrop-blur-md border-b border-slate-800/80 px-4 md:px-6 py-2.5 transition-all">
+      <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
         
-        {/* Zone 1: Back Navigation Arrow + Brand Wordmark */}
+        {/* Brand Logo & Tagline */}
         <div className="flex items-center gap-3 shrink-0">
-          {canGoBack && onGoBack && (
-            <button
-              onClick={onGoBack}
-              className="flex items-center gap-1.5 p-1.5 md:px-2.5 md:py-1.5 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-200 hover:text-white border border-slate-700/60 shadow-sm transition-all duration-150 active:scale-95 group shrink-0"
-              title={`Back to ${previousModeLabel || 'previous page'}`}
-              aria-label="Back to previous page"
-            >
-              <ArrowLeft className="w-4 h-4 text-cyan-400 group-hover:-translate-x-0.5 transition-transform" />
-              <span className="hidden sm:inline text-xs font-semibold capitalize text-slate-300 group-hover:text-white">
-                Back
-              </span>
-            </button>
-          )}
-
-          <div 
-            onClick={() => onSelectMode('feed')}
-            className="flex items-center gap-2 cursor-pointer select-none shrink-0 group"
-          >
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-cyan-500 via-indigo-500 to-fuchsia-500 p-[1.5px] transition-transform duration-200 group-hover:scale-105">
-              <div className="w-full h-full bg-[#090a0f] rounded-[6px] flex items-center justify-center">
-                <span className="font-extrabold text-transparent bg-clip-text bg-gradient-to-tr from-cyan-400 to-fuchsia-400 text-base tracking-tighter">
-                  G
-                </span>
-              </div>
-            </div>
-            <span className="text-xl font-bold tracking-tight text-white whitespace-nowrap shrink-0 font-['Outfit'] flex items-center gap-1.5">
-              GLITCH
-              <span className="text-[10px] font-mono font-medium text-cyan-400/80 tracking-widest uppercase">
-                ONE
-              </span>
-            </span>
-          </div>
-        </div>
-
-        {/* Zone 2: 4-5 clean, single-line text navigation links */}
-        <nav className="hidden md:flex items-center gap-7 text-sm font-medium">
-          <button
-            onClick={() => onSelectMode('feed')}
-            className={`whitespace-nowrap shrink-0 transition-colors py-1 relative ${
-              currentMode === 'feed'
-                ? 'text-white font-semibold'
-                : 'text-slate-400 hover:text-slate-200'
-            }`}
-          >
-            Feed
-            {currentMode === 'feed' && (
-              <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-fuchsia-500 to-cyan-500 rounded-full" />
-            )}
-          </button>
-
           <button
             onClick={() => onSelectMode('sparks')}
-            className={`whitespace-nowrap shrink-0 transition-colors py-1 relative flex items-center gap-1.5 ${
+            className="flex items-center gap-2 group text-left"
+          >
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-cyan-500 via-fuchsia-500 to-pink-500 p-[2px] shadow-[0_0_15px_rgba(6,182,212,0.3)] group-hover:scale-105 transition-transform">
+              <div className="w-full h-full bg-[#090a0f] rounded-[10px] flex items-center justify-center">
+                <Flame className="w-5 h-5 text-cyan-400 group-hover:text-pink-400 transition-colors" />
+              </div>
+            </div>
+            <div>
+              <div className="flex items-center gap-1.5">
+                <span className="font-extrabold text-base tracking-tight text-white group-hover:text-cyan-300 transition-colors font-['Plus_Jakarta_Sans']">
+                  GLITCH
+                </span>
+                <span className="text-[10px] px-1.5 py-0.2 rounded bg-pink-500/20 text-pink-300 border border-pink-500/30 font-mono font-bold">
+                  TIKTOK
+                </span>
+              </div>
+              <p className="text-[10px] text-slate-400 hidden sm:block">
+                Short Videos · Live · Creators
+              </p>
+            </div>
+          </button>
+        </div>
+
+        {/* Central TikTok Navigation Tabs (Desktop & Tablet) */}
+        <nav className="hidden md:flex items-center gap-1 bg-slate-900/80 border border-slate-800 rounded-xl p-1 text-xs font-semibold">
+          <button
+            onClick={() => onSelectMode('sparks')}
+            className={`px-3.5 py-1.5 rounded-lg flex items-center gap-1.5 transition-all ${
               currentMode === 'sparks'
-                ? 'text-white font-semibold'
-                : 'text-slate-400 hover:text-slate-200'
+                ? 'bg-cyan-500 text-slate-950 font-bold shadow-sm'
+                : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
             }`}
           >
-            <Flame className="w-3.5 h-3.5 text-fuchsia-400" />
-            Sparks
-            {currentMode === 'sparks' && (
-              <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-fuchsia-500 to-cyan-500 rounded-full" />
-            )}
+            <Flame className="w-3.5 h-3.5" />
+            <span>Sparks (For You)</span>
           </button>
 
           <button
-            onClick={() => onSelectMode('tube')}
-            className={`whitespace-nowrap shrink-0 transition-colors py-1 relative flex items-center gap-1.5 ${
-              currentMode === 'tube'
-                ? 'text-white font-semibold'
-                : 'text-slate-400 hover:text-slate-200'
+            onClick={() => onSelectMode('feed')}
+            className={`px-3.5 py-1.5 rounded-lg flex items-center gap-1.5 transition-all ${
+              currentMode === 'feed'
+                ? 'bg-fuchsia-500 text-white font-bold shadow-sm'
+                : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
             }`}
           >
-            <PlaySquare className="w-3.5 h-3.5 text-red-400" />
-            Watch
-            {currentMode === 'tube' && (
-              <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-fuchsia-500 to-cyan-500 rounded-full" />
-            )}
+            <Home className="w-3.5 h-3.5" />
+            <span>Following Feed</span>
           </button>
 
           <button
             onClick={() => onSelectMode('live')}
-            className={`whitespace-nowrap shrink-0 transition-colors py-1 relative flex items-center gap-1.5 ${
+            className={`px-3.5 py-1.5 rounded-lg flex items-center gap-1.5 transition-all relative ${
               currentMode === 'live'
-                ? 'text-white font-semibold'
-                : 'text-slate-400 hover:text-slate-200'
+                ? 'bg-red-500 text-white font-bold shadow-sm'
+                : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
             }`}
           >
-            <Radio className="w-3.5 h-3.5 text-rose-400 animate-pulse" />
-            Live
-            {currentMode === 'live' && (
-              <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-rose-500 to-amber-500 rounded-full" />
-            )}
+            <Radio className="w-3.5 h-3.5 text-red-400 animate-pulse" />
+            <span>LIVE</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-ping absolute top-1.5 right-1.5" />
           </button>
 
           <button
             onClick={() => onSelectMode('explore')}
-            className={`whitespace-nowrap shrink-0 transition-colors py-1 relative flex items-center gap-1.5 ${
+            className={`px-3.5 py-1.5 rounded-lg flex items-center gap-1.5 transition-all ${
               currentMode === 'explore'
-                ? 'text-white font-semibold'
-                : 'text-slate-400 hover:text-slate-200'
+                ? 'bg-cyan-500 text-slate-950 font-bold shadow-sm'
+                : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
             }`}
           >
             <Compass className="w-3.5 h-3.5" />
-            Explore
-            {currentMode === 'explore' && (
-              <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-fuchsia-500 to-cyan-500 rounded-full" />
-            )}
-          </button>
-
-          <button
-            onClick={() => onSelectMode('messages')}
-            className={`whitespace-nowrap shrink-0 transition-colors py-1 relative flex items-center gap-1.5 ${
-              currentMode === 'messages'
-                ? 'text-white font-semibold'
-                : 'text-slate-400 hover:text-slate-200'
-            }`}
-          >
-            <MessageCircle className="w-3.5 h-3.5" />
-            Direct
-            {unreadCount > 0 && (
-              <span className="w-2 h-2 rounded-full bg-cyan-400" />
-            )}
-            {currentMode === 'messages' && (
-              <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-fuchsia-500 to-cyan-500 rounded-full" />
-            )}
+            <span>Explore</span>
           </button>
         </nav>
 
-        {/* Zone 3: Wallet + Notifications + Create + Profile */}
-        <div className="flex items-center gap-2 md:gap-2.5 shrink-0">
+        {/* Right Actions & Profile */}
+        <div className="flex items-center gap-2.5">
           
-          {/* Glitch Sparks Wallet Pill */}
+          {/* Create Button (+) */}
           <button
-            onClick={onOpenWallet}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 text-xs font-semibold transition-all active:scale-95"
-            title="Glitch Sparks Virtual Wallet"
+            onClick={onOpenCreate}
+            className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-cyan-400 via-fuchsia-500 to-pink-500 hover:opacity-90 text-slate-950 font-bold text-xs flex items-center gap-1.5 shadow-[0_0_15px_rgba(236,72,153,0.3)] transition-all active:scale-95"
+            title="Create & Upload Video"
           >
-            <Zap className="w-3.5 h-3.5 fill-amber-400" />
-            <span className="font-mono">{(currentUser.walletSparks ?? 2850).toLocaleString()}</span>
+            <Plus className="w-4 h-4 text-slate-950 stroke-[3]" />
+            <span className="hidden sm:inline">Upload</span>
           </button>
 
-          {/* Activity Center Bell Button */}
+          {/* Kelviq Pro Billing Button */}
+          <button
+            onClick={onOpenPricing}
+            className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold flex items-center gap-1.5 transition-all border ${
+              isPro
+                ? 'bg-emerald-950/80 border-emerald-500/50 text-emerald-300'
+                : 'bg-gradient-to-r from-amber-500/20 to-orange-500/20 border-amber-500/40 text-amber-300 hover:from-amber-500/30'
+            }`}
+            title="Kelviq Pro Pass"
+          >
+            <Crown className={`w-3.5 h-3.5 ${isPro ? 'text-emerald-400' : 'text-amber-400'}`} />
+            <span className="hidden md:inline">{isPro ? 'Pro Active' : 'Get Pro ($9)'}</span>
+          </button>
+
+          {/* Direct Messages Icon */}
+          <button
+            onClick={() => onSelectMode('messages')}
+            className={`relative p-2 rounded-xl border transition-colors ${
+              currentMode === 'messages'
+                ? 'bg-cyan-950/60 border-cyan-500/50 text-cyan-300'
+                : 'bg-slate-900 border-slate-800 text-slate-300 hover:text-white'
+            }`}
+            title="Direct Messages"
+          >
+            <MessageCircle className="w-4 h-4" />
+            {unreadMessagesCount > 0 && (
+              <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-cyan-500 text-[10px] font-bold text-slate-950 flex items-center justify-center">
+                {unreadMessagesCount}
+              </span>
+            )}
+          </button>
+
+          {/* Notifications Bell */}
           <button
             onClick={onOpenNotifications}
-            className="relative p-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors"
-            aria-label="Activity Center"
-            title="Activity Center"
+            className="relative p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-white transition-colors"
+            title="Activity Notifications"
           >
-            <Bell className="w-4 h-4 text-slate-300" />
+            <Bell className="w-4 h-4" />
             {unreadNotificationsCount > 0 && (
-              <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-cyan-500 text-slate-950 font-mono text-[9px] font-bold flex items-center justify-center ring-2 ring-[#090a0f]">
+              <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-pink-500 text-[10px] font-bold text-white flex items-center justify-center">
                 {unreadNotificationsCount}
               </span>
             )}
           </button>
 
-          {/* Mobile Direct icon shortcut */}
-          <button
-            onClick={() => onSelectMode('messages')}
-            className="md:hidden relative p-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors"
-            aria-label="Direct Messages"
-          >
-            <MessageCircle className="w-4 h-4 text-cyan-400" />
-            {unreadCount > 0 && (
-              <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-cyan-400 ring-2 ring-[#090a0f]" />
-            )}
-          </button>
-
-          <button
-            onClick={onOpenCreate}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-gradient-to-r from-fuchsia-600 to-cyan-600 hover:from-fuchsia-500 hover:to-cyan-500 rounded-lg shadow-sm transition-all duration-200 hover:shadow-cyan-500/20 whitespace-nowrap active:scale-95"
-          >
-            <Plus className="w-4 h-4 stroke-[2.5]" />
-            <span className="hidden sm:inline">Create</span>
-          </button>
-
+          {/* Profile Avatar */}
           <button
             onClick={() => onSelectMode('profile')}
-            className={`relative rounded-full p-0.5 transition-transform duration-200 hover:scale-105 ${
-              currentMode === 'profile'
-                ? 'ring-2 ring-cyan-400 ring-offset-2 ring-offset-[#090a0f]'
-                : 'hover:ring-1 hover:ring-slate-600'
+            className={`flex items-center gap-2 p-0.5 rounded-full ring-2 transition-all ${
+              currentMode === 'profile' ? 'ring-cyan-400' : 'ring-slate-800 hover:ring-slate-700'
             }`}
-            title="Profile"
+            title="View Profile"
           >
             <img
               src={currentUser.avatar}
               alt={currentUser.name}
               className="w-8 h-8 rounded-full object-cover"
-              referrerPolicy="no-referrer"
             />
           </button>
+
         </div>
 
       </div>

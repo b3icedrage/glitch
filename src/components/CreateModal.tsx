@@ -101,7 +101,7 @@ export const CreateModal: React.FC<CreateModalProps> = ({
       onPublishFeedPost(newPost);
     } else if (contentType === 'tube') {
       const newVideo: CinemaVideo = {
-        id: `yt_${Date.now()}`,
+        id: `cinema_${Date.now()}`,
         title: title || 'Deep Dive: Future of Creative Web Architecture',
         description: caption || 'Detailed breakdown of our latest production build and audio synthesis.',
         videoUrl: selectedMedia.videoUrl,

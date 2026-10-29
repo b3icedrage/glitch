@@ -1,6 +1,7 @@
 {
-  "name": "Glitch - Social Video & Media Platform",
-  "description": "Unified social powerhouse combining visual feeds & stories, dynamic vertical sparks with sound remixing, and long-form cinema watch player.",
+  "name": "Glitch - Short Video & Creator Social Platform",
+  "description": "Next-generation short video and creator social media platform with full TikTok-style Sparks video feed, Live streaming, stories, Sound Hub, creator gifts, DMs, and Kelviq Pro billing.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }
+

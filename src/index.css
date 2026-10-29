@@ -47,3 +47,35 @@
   scrollbar-width: none;
 }
 
+/* Print Styles for Payment Receipts - Strictly locked unless funds are confirmed received */
+@media print {
+  body {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+  }
+  
+  /* Hide all non-printable elements by default */
+  header, nav, main, .no-print, #root > *:not(#official-glitch-printable-receipt) {
+    display: none !important;
+  }
+  
+  /* Receipt is hidden by default and ONLY visible when funds are 100% verified received */
+  #official-glitch-printable-receipt {
+    display: none !important;
+  }
+
+  #official-glitch-printable-receipt[data-funds-received="true"] {
+    display: block !important;
+    position: static !important;
+    width: 100% !important;
+    max-width: 650px !important;
+    margin: 0 auto !important;
+    padding: 24px !important;
+    color: #111827 !important;
+    background: #ffffff !important;
+    border: 2px solid #000000 !important;
+    border-radius: 8px !important;
+    box-shadow: none !important;
+  }
+}
+

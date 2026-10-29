@@ -404,7 +404,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
         <div className="text-center py-12 text-slate-500 text-xs">
           <Bookmark className="w-10 h-10 mx-auto mb-2 text-slate-600 stroke-[1.5]" />
           <p className="font-medium text-slate-400">All bookmarked media will appear here</p>
-          <p className="text-slate-500 mt-1">Bookmark posts, sparks, and tubes to curate your inspiration board.</p>
+          <p className="text-slate-500 mt-1">Bookmark posts, sparks, and cinema videos to curate your inspiration board.</p>
         </div>
       )}
 
