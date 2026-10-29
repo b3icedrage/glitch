@@ -1,1 +1,84 @@
-# glitch
+# GLITCH
+
+**A creator-first social playground for short video, live moments, stories, and community.**
+
+Glitch brings fast, expressive creator experiences into one dark, neon-accented interface. Explore the Sparks vertical feed, browse the following feed, discover creators, watch long-form videos, join live rooms, share stories, and message your community.
+
+> This repository is an actively evolving product prototype. Review the configuration and server integrations before using it with real users or processing payments.
+
+## What’s inside
+
+- **Sparks** — a vertical short-form video experience.
+- **Following feed & stories** — creator posts and story viewing.
+- **Explore** — discover posts, reels, and channels.
+- **Live** — interactive live-room UI with chat and creator tipping flows.
+- **Cinema** — long-form video browsing and channel subscriptions.
+- **Direct messages** — conversation inbox and messaging UI.
+- **Creator tools** — upload/create flows, comments, notifications, and profile views.
+- **Sound Hub & effects** — sound discovery and client-side audio/visual effects.
+- **Optional integrations** — server routes for Gemini-powered features and Kelviq billing/usage.
+
+## Stack
+
+- React 19 + TypeScript
+- Vite
+- Tailwind CSS 4
+- Lucide icons
+- Express + TypeScript server
+- Google GenAI SDK and Kelviq Node SDK for optional integrations
+
+## Run locally
+
+Requirements: Node.js compatible with the versions in `package.json` and npm.
+
+```bash
+npm install
+cp .env.example .env
+npm run dev
+```
+
+Open the local URL printed by Vite/the development server. Add only the credentials for integrations you actually intend to use; never commit your real `.env` file or API keys.
+
+## Useful commands
+
+```bash
+npm run dev    # Start the development server
+npm run build  # Build the production frontend
+npm run preview # Preview the built frontend
+npm run lint   # Type-check the TypeScript project
+```
+
+## Configuration
+
+See [`.env.example`](./.env.example) for supported environment variables. Keep server-only credentials on the server. Do not put secret keys in frontend variables or browser code.
+
+## Before production
+
+- Replace demo/mock content with a persistent, authenticated data layer.
+- Verify authentication, authorization, upload limits, moderation, and rate limiting.
+- Test payment webhooks and confirm payment status server-side before granting entitlements or issuing receipts.
+- Review privacy, data retention, accessibility, and mobile layouts.
+- Run the build and type-check commands, then exercise the main user flows on a real device.
+- Configure production secrets in your hosting provider rather than in source control.
+
+## Project structure
+
+```text
+src/
+  components/   UI views, drawers, and modals
+  data/         Demo content and seed data
+  services/     Client-side feature services
+  server/       Server integration helpers
+  types/        Shared TypeScript types
+  App.tsx       Application state and view routing
+  index.css     Global styles and design foundations
+server.ts       Express development/server entry point
+```
+
+## Contributing
+
+Keep changes focused, use the existing component patterns, and run `npm run lint` and `npm run build` before opening a pull request. Prefer accessible labels, useful empty/error states, and small reusable components over one-off UI hacks.
+
+---
+
+Built for creators. Designed for the scroll.
