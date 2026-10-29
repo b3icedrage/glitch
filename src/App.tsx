@@ -308,6 +308,7 @@ export default function App() {
             onNavigateToMessages={() => handleSelectMode('messages')}
             onToggleFollow={handleToggleFollow}
             followedUserIds={followedUserIds}
+            onUpdatePost={(postId, updates) => setFeedPosts((prev) => prev.map((post) => post.id === postId ? { ...post, ...updates } : post))}
           />
         )}
 
