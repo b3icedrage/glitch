@@ -286,6 +286,7 @@ export default function App() {
             onToggleFollow={handleToggleFollow}
             followedUserIds={followedUserIds}
             onOpenSoundHub={handleOpenSoundHub}
+            onUpdateSpark={(reelId, updates) => setSparks((prev) => prev.map((reel) => reel.id === reelId ? { ...reel, ...updates } : reel))}
           />
         )}
 
