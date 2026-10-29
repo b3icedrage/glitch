@@ -51,6 +51,7 @@ export const SparksView: React.FC<SparksViewProps> = ({
   const [duration, setDuration] = useState(0);
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const touchStartY = useRef<number | null>(null);
   const activeReel = localReels[currentIndex];
 
   useEffect(() => {
@@ -162,11 +163,23 @@ export const SparksView: React.FC<SparksViewProps> = ({
     onUpdateSpark?.(reelId, { isSaved });
   };
 
-  const handleShare = () => {
-    if (navigator.clipboard) {
-      navigator.clipboard.writeText(`https://glitch.network/sparks/${activeReel.id}`);
+  const handleShare = async () => {
+    const url = `${window.location.origin}/sparks/${activeReel.id}`;
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: 'GLITCH Spark', text: activeReel.caption, url });
+        showToast('Thanks for sharing this Spark');
+      } else if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(url);
+        showToast('Spark link copied to clipboard');
+      } else {
+        showToast('Sharing is not supported by this browser');
+      }
+    } catch (error) {
+      if ((error as DOMException).name !== 'AbortError') {
+        showToast('Could not share this Spark');
+      }
     }
-    showToast('Sparks link copied to clipboard!');
   };
 
   const formatReelCount = (num: number) => {
@@ -190,7 +203,20 @@ export const SparksView: React.FC<SparksViewProps> = ({
       )}
 
       {/* Main Sparks Container (9:16 Aspect Ratio) */}
-      <div className="relative w-full max-w-[420px] h-full bg-black md:rounded-3xl overflow-hidden shadow-2xl border border-slate-800/60 flex items-center justify-center">
+      <div
+        className="relative w-full max-w-[420px] h-full bg-black md:rounded-3xl overflow-hidden shadow-2xl border border-slate-800/60 flex items-center justify-center"
+        onTouchStart={(event) => { touchStartY.current = event.changedTouches[0]?.clientY ?? null; }}
+        onTouchEnd={(event) => {
+          const startY = touchStartY.current;
+          const endY = event.changedTouches[0]?.clientY;
+          touchStartY.current = null;
+          if (startY === null || endY === undefined) return;
+          const delta = startY - endY;
+          if (Math.abs(delta) < 48) return;
+          if (delta > 0) goToNext();
+          else goToPrev();
+        }}
+      >
         
         {/* Video Player & Duet Split */}
         {isDuetMode ? (
