@@ -49,7 +49,17 @@ export const KelviqPricingModal: React.FC<KelviqPricingModalProps> = ({
         body: JSON.stringify({ chargePeriod: billingPeriod }),
       });
 
-      const data = await res.json();
+      const contentType = res.headers.get('content-type') || '';
+      const body = await res.text();
+      if (!contentType.includes('application/json')) {
+        throw new Error(`Billing API returned a non-JSON response (${res.status}). Check the deployment's /api routing and server logs.`);
+      }
+      let data: any;
+      try {
+        data = JSON.parse(body);
+      } catch {
+        throw new Error('Billing API returned invalid JSON.');
+      }
       if (!res.ok || !data.checkoutUrl) {
         throw new Error(data.error || 'Failed to initialize checkout session');
       }
@@ -73,7 +83,17 @@ export const KelviqPricingModal: React.FC<KelviqPricingModalProps> = ({
         headers: { 'Content-Type': 'application/json' },
       });
 
-      const data = await res.json();
+      const contentType = res.headers.get('content-type') || '';
+      const body = await res.text();
+      if (!contentType.includes('application/json')) {
+        throw new Error(`Billing portal API returned a non-JSON response (${res.status}). Check the deployment's /api routing and server logs.`);
+      }
+      let data: any;
+      try {
+        data = JSON.parse(body);
+      } catch {
+        throw new Error('Billing portal API returned invalid JSON.');
+      }
       if (!res.ok || !data.portalUrl) {
         throw new Error(data.error || 'Customer billing portal is not available yet.');
       }
