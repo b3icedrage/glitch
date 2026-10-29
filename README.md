@@ -2,7 +2,7 @@
 
 **A creator-first social playground for short video, live moments, stories, and community.**
 
-Glitch brings fast, expressive creator experiences into one dark, neon-accented interface. Explore the Sparks vertical feed, browse the following feed, discover creators, watch long-form videos, join live rooms, share stories, and message your community.
+Glitch brings fast, expressive creator experiences into a deep forest-green interface with soft peach accents. Explore the Sparks vertical feed, browse the following feed, discover creators, watch long-form videos, join live rooms, share stories, and message your community.
 
 > This repository is an actively evolving product prototype. Review the configuration and server integrations before using it with real users or processing payments.
 
@@ -52,7 +52,7 @@ npm run lint   # Type-check the TypeScript project
 
 See [`.env.example`](./.env.example) for supported environment variables. Keep server-only credentials on the server. Do not put secret keys in frontend variables or browser code.
 
-## Before production
+## Payment safety status\n\n- Kelviq checkout and portal sessions are created server-side, but webhook subscription lifecycle handling is still TODO and must be completed before production use.\n- PesaPal direct-payment simulation has been disabled because it previously returned fabricated success and settlement details.\n- PesaPal authentication no longer returns provider credentials to the browser, and failed checkout responses no longer generate fake checkout URLs.\n- Configure valid provider credentials and implement durable order storage plus server-side transaction-status verification before granting credits or creator payouts.\n\n## Before production
 
 - Replace demo/mock content with a persistent, authenticated data layer.
 - Verify authentication, authorization, upload limits, moderation, and rate limiting.
