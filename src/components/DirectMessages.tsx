@@ -38,6 +38,7 @@ interface DirectMessagesProps {
   onNavigateToSpark?: (sparkId: string) => void;
   onNavigateToTube?: (tubeId: string) => void;
   onGoBack?: () => void;
+  onChatsChange?: (chats: ChatThread[]) => void;
 }
 
 export const DirectMessages: React.FC<DirectMessagesProps> = ({
@@ -46,7 +47,8 @@ export const DirectMessages: React.FC<DirectMessagesProps> = ({
   onNavigateToFeedPost,
   onNavigateToSpark,
   onNavigateToTube,
-  onGoBack
+  onGoBack,
+  onChatsChange
 }) => {
   const [threads, setThreads] = useState<ChatThread[]>(chats);
   const [activeChatId, setActiveChatId] = useState<string>(chats[0]?.id || '');
@@ -91,6 +93,11 @@ export const DirectMessages: React.FC<DirectMessagesProps> = ({
   };
 
   const activeThread = threads.find(t => t.id === activeChatId) || threads[0];
+
+  // Let the app own a persisted snapshot of conversation changes.
+  useEffect(() => {
+    onChatsChange?.(threads);
+  }, [threads, onChatsChange]);
 
   // Auto scroll to bottom of active conversation
   useEffect(() => {
