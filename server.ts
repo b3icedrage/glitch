@@ -1,8 +1,13 @@
 import express, { Request, Response } from 'express';
 import dotenv from 'dotenv';
 import path from 'path';
+import fs from 'fs';
+import { exec } from 'child_process';
+import { promisify } from 'util';
 import { fileURLToPath } from 'url';
 import { GoogleGenAI } from '@google/genai';
+
+const execAsync = promisify(exec);
 
 import {
   handleCheckout,
@@ -544,6 +549,126 @@ app.get('/api/agent/graveyard', (_req: Request, res: Response) => {
     totalCurrencySettledUSD: parseFloat(totalCurrencySettledUSD.toFixed(2)),
     beneficiaryCard: BENEFICIARY_CARD_NUMBER
   });
+});
+
+// ============================================================================
+// GITHUB REPOSITORY SYNC (COMMIT & PUSH) API ROUTES
+// ============================================================================
+
+function sanitizeGitOutput(text: string): string {
+  return String(text || '').replace(/https:\/\/[^@\s]+@github\.com/g, 'https://github.com');
+}
+
+app.get('/api/git/status', async (_req: Request, res: Response) => {
+  try {
+    const cwd = process.cwd();
+    const [branchRes, remoteRes, statusRes, logRes] = await Promise.all([
+      execAsync('git rev-parse --abbrev-ref HEAD', { cwd }),
+      execAsync('git config --get remote.origin.url', { cwd }).catch(() => ({ stdout: 'https://github.com/b3icedrage/glitch.git' })),
+      execAsync('git status --porcelain', { cwd }),
+      execAsync('git log -n 8 --pretty=format:"%h|%an|%cr|%s"', { cwd }),
+    ]);
+
+    const branch = branchRes.stdout.trim() || 'main';
+    const remoteUrl = sanitizeGitOutput(remoteRes.stdout.trim());
+    const files = statusRes.stdout
+      .split('\n')
+      .map((l) => l.trim())
+      .filter(Boolean)
+      .map((line) => ({
+        status: line.slice(0, 2).trim(),
+        path: line.slice(2).trim(),
+      }));
+
+    const commits = logRes.stdout
+      .split('\n')
+      .map((l) => l.trim())
+      .filter(Boolean)
+      .map((line) => {
+        const [hash, author, date, ...msgParts] = line.split('|');
+        return {
+          hash: hash || '',
+          author: author || 'Creator',
+          date: date || 'recently',
+          message: msgParts.join('|') || '',
+        };
+      });
+
+    res.json({
+      success: true,
+      branch,
+      remoteUrl,
+      clean: files.length === 0,
+      files,
+      commits,
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      error: sanitizeGitOutput(error.message || 'Failed to read git repository status'),
+    });
+  }
+});
+
+app.post('/api/git/commit-and-push', async (req: Request, res: Response) => {
+  try {
+    const cwd = process.cwd();
+    const { message, touchChangelog } = req.body || {};
+    const commitMsg = String(message || 'chore: update Glitch app').replace(/"/g, '\\"');
+
+    // Ensure git user identity is configured locally
+    await execAsync('git config user.name "Glitch Studio"', { cwd });
+    await execAsync('git config user.email "brayoooo1021@gmail.com"', { cwd });
+
+    if (touchChangelog) {
+      const readmePath = path.join(cwd, 'README.md');
+      const existing = fs.existsSync(readmePath) ? fs.readFileSync(readmePath, 'utf-8') : '# glitch\n';
+      const stamp = `\n- Synced at ${new Date().toISOString()}: ${message || 'Platform update'}`;
+      fs.writeFileSync(readmePath, existing.trimEnd() + stamp + '\n', 'utf-8');
+    }
+
+    await execAsync('git add -A', { cwd });
+    const statusCheck = await execAsync('git status --porcelain', { cwd });
+
+    let outputLog = '';
+    if (statusCheck.stdout.trim().length > 0) {
+      const commitRes = await execAsync(`git commit -m "${commitMsg}"`, { cwd });
+      outputLog += sanitizeGitOutput(commitRes.stdout + '\n' + commitRes.stderr);
+    } else {
+      outputLog += 'Working tree clean — pushing current HEAD to origin.\n';
+    }
+
+    await execAsync('git pull --rebase origin main', { cwd }).catch(() => {});
+    const pushRes = await execAsync('git push origin HEAD:main', { cwd });
+    outputLog += sanitizeGitOutput(pushRes.stdout + '\n' + pushRes.stderr);
+
+    res.json({
+      success: true,
+      summary: 'Changes committed and pushed to github.com/b3icedrage/glitch.git (main)',
+      output: outputLog.trim(),
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      error: sanitizeGitOutput(error.stderr || error.message || 'Git commit & push failed'),
+    });
+  }
+});
+
+app.post('/api/git/pull', async (_req: Request, res: Response) => {
+  try {
+    const cwd = process.cwd();
+    const pullRes = await execAsync('git pull --rebase origin main', { cwd });
+    res.json({
+      success: true,
+      output: sanitizeGitOutput(pullRes.stdout + '\n' + pullRes.stderr).trim(),
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      error: sanitizeGitOutput(error.stderr || error.message || 'Git pull failed'),
+    });
+  }
 });
 
 // ============================================================================

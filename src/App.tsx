@@ -44,6 +44,7 @@ import { NotificationsDrawer } from './components/NotificationsDrawer';
 import { StoryViewerModal } from './components/StoryViewerModal';
 import { SoundHubModal } from './components/SoundHubModal';
 import { KelviqPricingModal } from './components/KelviqPricingModal';
+import { GitHubSyncModal } from './components/GitHubSyncModal';
 
 export default function App() {
   // Navigation State (defaults to TikTok 'sparks' video feed)
@@ -74,8 +75,9 @@ export default function App() {
   const [isSoundHubOpen, setIsSoundHubOpen] = useState(false);
   const [activeSound, setActiveSound] = useState<GlitchSound | null>(null);
 
-  // Kelviq Billing State
+  // Kelviq Billing & Git Sync State
   const [isPricingOpen, setIsPricingOpen] = useState(false);
+  const [isGitSyncOpen, setIsGitSyncOpen] = useState(false);
   const [isPro, setIsPro] = useState(false);
   const [billingToast, setBillingToast] = useState<string | null>(null);
 
@@ -227,6 +229,7 @@ export default function App() {
         onOpenCreate={() => setIsCreateOpen(true)}
         onOpenNotifications={() => setIsNotificationsOpen(true)}
         onOpenPricing={() => setIsPricingOpen(true)}
+        onOpenGitSync={() => setIsGitSyncOpen(true)}
         isPro={isPro}
         unreadNotificationsCount={unreadNotificationsCount}
         unreadMessagesCount={unreadMessagesCount}
@@ -439,6 +442,12 @@ export default function App() {
         isOpen={isPricingOpen}
         onClose={() => setIsPricingOpen(false)}
         isPro={isPro}
+      />
+
+      {/* 7. GitHub Repository Commit & Push Modal */}
+      <GitHubSyncModal
+        isOpen={isGitSyncOpen}
+        onClose={() => setIsGitSyncOpen(false)}
       />
 
     </div>
