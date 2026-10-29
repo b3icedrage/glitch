@@ -13,7 +13,6 @@ import {
   Sparkles,
   CreditCard,
   Crown,
-  GitBranch
 } from 'lucide-react';
 
 interface HeaderProps {
@@ -23,7 +22,6 @@ interface HeaderProps {
   onOpenCreate: () => void;
   onOpenNotifications: () => void;
   onOpenPricing: () => void;
-  onOpenGitSync?: () => void;
   isPro?: boolean;
   unreadNotificationsCount?: number;
   unreadMessagesCount?: number;
@@ -36,7 +34,6 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenCreate,
   onOpenNotifications,
   onOpenPricing,
-  onOpenGitSync,
   isPro = false,
   unreadNotificationsCount = 3,
   unreadMessagesCount = 2,
@@ -136,18 +133,6 @@ export const Header: React.FC<HeaderProps> = ({
             <Plus className="w-4 h-4 text-slate-950 stroke-[3]" />
             <span className="hidden sm:inline">Upload</span>
           </button>
-
-          {/* GitHub Commit & Push Button */}
-          {onOpenGitSync && (
-            <button
-              onClick={onOpenGitSync}
-              className="px-3 py-1.5 rounded-xl text-xs font-mono font-bold flex items-center gap-1.5 transition-all bg-slate-900 hover:bg-slate-800 border border-cyan-500/40 text-cyan-300"
-              title="Commit & Push to GitHub (b3icedrage/glitch)"
-            >
-              <GitBranch className="w-3.5 h-3.5 text-cyan-400" />
-              <span className="hidden lg:inline">Git Push</span>
-            </button>
-          )}
 
           {/* Kelviq Pro Billing Button */}
           <button
