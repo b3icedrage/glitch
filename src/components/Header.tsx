@@ -62,7 +62,7 @@ export const Header: React.FC<HeaderProps> = ({
                   GLITCH
                 </span>
                 <span className="text-[10px] px-1.5 py-0.2 rounded bg-pink-500/20 text-pink-300 border border-pink-500/30 font-mono font-bold">
-                  TIKTOK
+                  CREATOR STUDIO
                 </span>
               </div>
               <p className="text-[10px] text-slate-400 hidden sm:block">
@@ -72,7 +72,7 @@ export const Header: React.FC<HeaderProps> = ({
           </button>
         </div>
 
-        {/* Central TikTok Navigation Tabs (Desktop & Tablet) */}
+        {/* Primary navigation tabs for desktop and tablet */}
         <nav className="hidden md:flex items-center gap-1 bg-slate-900/80 border border-slate-800 rounded-xl p-1 text-xs font-semibold">
           <button
             onClick={() => onSelectMode('sparks')}
