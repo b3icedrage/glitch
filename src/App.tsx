@@ -45,24 +45,41 @@ import { StoryViewerModal } from './components/StoryViewerModal';
 import { SoundHubModal } from './components/SoundHubModal';
 import { KelviqPricingModal } from './components/KelviqPricingModal';
 
+function readStoredState<T>(key: string, fallback: T): T {
+  try {
+    const raw = window.localStorage.getItem(key);
+    return raw ? (JSON.parse(raw) as T) : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function writeStoredState(key: string, value: unknown) {
+  try {
+    window.localStorage.setItem(key, JSON.stringify(value));
+  } catch (error) {
+    console.warn(`Could not save ${key} locally:`, error);
+  }
+}
+
 export default function App() {
   // Navigation State (defaults to TikTok 'sparks' video feed)
   const [currentMode, setCurrentMode] = useState<PlatformMode>('sparks');
   const [previousMode, setPreviousMode] = useState<PlatformMode>('sparks');
 
   // Application Data State
-  const [currentUser, setCurrentUser] = useState<User>(CURRENT_USER);
-  const [feedPosts, setFeedPosts] = useState<FeedPost[]>(INITIAL_FEED_POSTS);
-  const [sparks, setSparks] = useState<SparkReel[]>(INITIAL_SPARKS);
-  const [cinemaVideos, setCinemaVideos] = useState<CinemaVideo[]>(INITIAL_CINEMA_VIDEOS);
-  const [stories, setStories] = useState<UserStory[]>(INITIAL_STORIES);
-  const [chats, setChats] = useState<ChatThread[]>(INITIAL_CHATS);
-  const [notifications, setNotifications] = useState<GlitchNotification[]>(INITIAL_NOTIFICATIONS);
+  const [currentUser, setCurrentUser] = useState<User>(() => readStoredState('glitch.currentUser', CURRENT_USER));
+  const [feedPosts, setFeedPosts] = useState<FeedPost[]>(() => readStoredState('glitch.feedPosts', INITIAL_FEED_POSTS));
+  const [sparks, setSparks] = useState<SparkReel[]>(() => readStoredState('glitch.sparks', INITIAL_SPARKS));
+  const [cinemaVideos, setCinemaVideos] = useState<CinemaVideo[]>(() => readStoredState('glitch.cinemaVideos', INITIAL_CINEMA_VIDEOS));
+  const [stories, setStories] = useState<UserStory[]>(() => readStoredState('glitch.stories', INITIAL_STORIES));
+  const [chats, setChats] = useState<ChatThread[]>(() => readStoredState('glitch.chats', INITIAL_CHATS));
+  const [notifications, setNotifications] = useState<GlitchNotification[]>(() => readStoredState('glitch.notifications', INITIAL_NOTIFICATIONS));
   const [liveStreams] = useState<LiveStream[]>(INITIAL_LIVE_STREAMS);
 
   // Social Connections & Subscriptions
-  const [followedUserIds, setFollowedUserIds] = useState<Set<string>>(new Set(['user_kai', 'user_elena']));
-  const [subscribedChannelIds, setSubscribedChannelIds] = useState<Set<string>>(new Set(['user_elena']));
+  const [followedUserIds, setFollowedUserIds] = useState<Set<string>>(() => new Set(readStoredState<string[]>('glitch.followedUserIds', ['user_kai', 'user_elena'])));
+  const [subscribedChannelIds, setSubscribedChannelIds] = useState<Set<string>>(() => new Set(readStoredState<string[]>('glitch.subscribedChannelIds', ['user_elena'])));
 
   // Modals & Drawers State
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -78,6 +95,18 @@ export default function App() {
   const [isPricingOpen, setIsPricingOpen] = useState(false);
   const [isPro, setIsPro] = useState(false);
   const [billingToast, setBillingToast] = useState<string | null>(null);
+
+  // Keep the prototype's content and social actions across refreshes on this device.
+  // This is device-local persistence, not a substitute for an authenticated cloud database.
+  useEffect(() => writeStoredState('glitch.currentUser', currentUser), [currentUser]);
+  useEffect(() => writeStoredState('glitch.feedPosts', feedPosts), [feedPosts]);
+  useEffect(() => writeStoredState('glitch.sparks', sparks), [sparks]);
+  useEffect(() => writeStoredState('glitch.cinemaVideos', cinemaVideos), [cinemaVideos]);
+  useEffect(() => writeStoredState('glitch.stories', stories), [stories]);
+  useEffect(() => writeStoredState('glitch.chats', chats), [chats]);
+  useEffect(() => writeStoredState('glitch.notifications', notifications), [notifications]);
+  useEffect(() => writeStoredState('glitch.followedUserIds', Array.from(followedUserIds)), [followedUserIds]);
+  useEffect(() => writeStoredState('glitch.subscribedChannelIds', Array.from(subscribedChannelIds)), [subscribedChannelIds]);
 
   // Fetch live Kelviq entitlements & check URL params
   useEffect(() => {
