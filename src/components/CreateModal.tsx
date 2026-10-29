@@ -27,6 +27,7 @@ export const CreateModal: React.FC<CreateModalProps> = ({
   const [location, setLocation] = useState('');
   const [category, setCategory] = useState('Tech & Hardware');
   const [selectedPresetIndex, setSelectedPresetIndex] = useState(0);
+  const [uploadedMedia, setUploadedMedia] = useState<{ title: string; url: string; videoUrl: string; kind: 'image' | 'video' } | null>(null);
   const [filterStyle, setFilterStyle] = useState<'none' | 'cyber' | 'noir' | 'warm'>('none');
   const [selectedSound, setSelectedSound] = useState('Glitch Beats Vol. 4');
 
@@ -56,7 +57,34 @@ export const CreateModal: React.FC<CreateModalProps> = ({
     }
   ];
 
-  const selectedMedia = mediaPresets[selectedPresetIndex];
+  const selectedMedia = uploadedMedia || mediaPresets[selectedPresetIndex];
+
+  const handleMediaUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    const isVideo = file.type.startsWith('video/');
+    const isImage = file.type.startsWith('image/');
+    const expectedVideo = contentType === 'spark' || contentType === 'tube';
+    if ((expectedVideo && !isVideo) || (!expectedVideo && !isImage)) {
+      window.alert(expectedVideo ? 'Choose a video file for Sparks or Cinema.' : 'Choose an image file for the feed or story.');
+      event.target.value = '';
+      return;
+    }
+    const maxBytes = isVideo ? 100 * 1024 * 1024 : 15 * 1024 * 1024;
+    if (file.size > maxBytes) {
+      window.alert(isVideo ? 'Videos must be 100 MB or smaller in this prototype.' : 'Images must be 15 MB or smaller.');
+      event.target.value = '';
+      return;
+    }
+    const objectUrl = URL.createObjectURL(file);
+    const poster = mediaPresets[selectedPresetIndex].url;
+    setUploadedMedia({
+      title: file.name,
+      url: isImage ? objectUrl : poster,
+      videoUrl: isVideo ? objectUrl : mediaPresets[selectedPresetIndex].videoUrl,
+      kind: isVideo ? 'video' : 'image'
+    });
+  };
 
   const handlePublish = (e: React.FormEvent) => {
     e.preventDefault();
@@ -250,13 +278,28 @@ export const CreateModal: React.FC<CreateModalProps> = ({
             {/* Media Asset Picker */}
             <div>
               <label className="block text-slate-300 mb-2 font-medium">
-                Choose High-Definition Asset
+                Upload your own {contentType === 'spark' || contentType === 'tube' ? 'video' : 'image'}
+              </label>
+              <input
+                type="file"
+                accept={contentType === 'spark' || contentType === 'tube' ? 'video/*' : 'image/*'}
+                onChange={handleMediaUpload}
+                className="block w-full mb-4 rounded-xl border border-slate-700 bg-slate-900 px-3 py-3 text-xs text-slate-200 file:mr-3 file:rounded-lg file:border-0 file:bg-cyan-400 file:px-3 file:py-2 file:font-bold file:text-slate-950"
+                aria-label="Choose media file to publish"
+              />
+              {uploadedMedia && (
+                <p className="mb-3 text-[11px] text-cyan-300">
+                  Selected: {uploadedMedia.title}. Local preview only; cloud upload storage is not configured.
+                </p>
+              )}
+              <label className="block text-slate-300 mb-2 font-medium">
+                Or choose a demo preset
               </label>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {mediaPresets.map((preset, idx) => (
                   <div
                     key={preset.title}
-                    onClick={() => setSelectedPresetIndex(idx)}
+                    onClick={() => { setSelectedPresetIndex(idx); setUploadedMedia(null); }}
                     className={`relative rounded-xl overflow-hidden cursor-pointer border-2 transition-all aspect-video group ${
                       selectedPresetIndex === idx
                         ? 'border-cyan-400 ring-2 ring-cyan-400/30'
