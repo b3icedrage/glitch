@@ -27,6 +27,7 @@ interface SparksViewProps {
   followedUserIds: Set<string>;
   onGoBack?: () => void;
   onOpenSoundHub?: (soundTitle: string, soundArtist: string, soundCover: string) => void;
+  onUpdateSpark?: (reelId: string, updates: Partial<SparkReel>) => void;
 }
 
 export const SparksView: React.FC<SparksViewProps> = ({
@@ -36,7 +37,8 @@ export const SparksView: React.FC<SparksViewProps> = ({
   onToggleFollow,
   followedUserIds,
   onGoBack,
-  onOpenSoundHub
+  onOpenSoundHub,
+  onUpdateSpark
 }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
@@ -50,6 +52,10 @@ export const SparksView: React.FC<SparksViewProps> = ({
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const activeReel = localReels[currentIndex];
+
+  useEffect(() => {
+    setLocalReels(reels);
+  }, [reels]);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -135,32 +141,25 @@ export const SparksView: React.FC<SparksViewProps> = ({
   };
 
   const toggleLike = (reelId: string) => {
-    setLocalReels(prev =>
-      prev.map(r => {
-        if (r.id === reelId) {
-          const isLiked = !r.isLiked;
-          return {
-            ...r,
-            isLiked,
-            likesCount: isLiked ? r.likesCount + 1 : r.likesCount - 1
-          };
-        }
-        return r;
-      })
-    );
+    const reel = localReels.find((item) => item.id === reelId);
+    if (!reel) return;
+    const isLiked = !reel.isLiked;
+    const likesCount = Math.max(0, reel.likesCount + (isLiked ? 1 : -1));
+    setLocalReels((prev) => prev.map((item) =>
+      item.id === reelId ? { ...item, isLiked, likesCount } : item
+    ));
+    onUpdateSpark?.(reelId, { isLiked, likesCount });
   };
 
   const toggleSave = (reelId: string) => {
-    setLocalReels(prev =>
-      prev.map(r => {
-        if (r.id === reelId) {
-          const isSaved = !r.isSaved;
-          if (isSaved) showToast('Saved to your sparks collection');
-          return { ...r, isSaved };
-        }
-        return r;
-      })
-    );
+    const reel = localReels.find((item) => item.id === reelId);
+    if (!reel) return;
+    const isSaved = !reel.isSaved;
+    if (isSaved) showToast('Saved to your Sparks collection');
+    setLocalReels((prev) => prev.map((item) =>
+      item.id === reelId ? { ...item, isSaved } : item
+    ));
+    onUpdateSpark?.(reelId, { isSaved });
   };
 
   const handleShare = () => {
