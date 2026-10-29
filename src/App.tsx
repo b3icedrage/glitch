@@ -133,7 +133,7 @@ export default function App() {
   // Fetch live Kelviq entitlements & check URL params
   useEffect(() => {
     if (window.location.search.includes('billing=success')) {
-      setBillingToast('🎉 Payment Successful! Your Kelviq Pro Pass has been activated.');
+      setBillingToast('Checkout returned successfully. Confirming your subscription status…');
       window.history.replaceState({}, document.title, window.location.pathname);
       setTimeout(() => setBillingToast(null), 5000);
     }
