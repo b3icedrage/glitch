@@ -94,19 +94,19 @@ export const KelviqPricingModal: React.FC<KelviqPricingModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in font-['Plus_Jakarta_Sans']">
-      <div className="relative w-full max-w-xl bg-slate-950 border border-cyan-500/30 rounded-2xl shadow-[0_0_50px_rgba(6,182,212,0.15)] overflow-hidden text-slate-100">
+      <div className="relative w-full max-w-xl bg-slate-950 border border-[#8fca83]/30 rounded-2xl shadow-[0_0_50px_rgba(143,202,131,0.14)] overflow-hidden text-slate-100">
         
         {/* Header Bar */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-900/60">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-cyan-950 border border-cyan-500/40 flex items-center justify-center">
-              <Zap className="w-4 h-4 text-cyan-400" />
+            <div className="w-8 h-8 rounded-lg bg-[#203522] border border-[#8fca83]/40 flex items-center justify-center">
+              <Zap className="w-4 h-4 text-[#a6d99b]" />
             </div>
             <div>
               <h2 className="text-base font-bold text-white flex items-center gap-2">
                 Kelviq Production Billing
                 {isPro && (
-                  <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-mono border border-emerald-500/30">
+                  <span className="px-2 py-0.5 rounded-full bg-[#8fca83]/20 text-[#a6d99b] text-[10px] font-mono border border-emerald-500/30">
                     Active Subscriber
                   </span>
                 )}
@@ -132,7 +132,7 @@ export const KelviqPricingModal: React.FC<KelviqPricingModalProps> = ({
                 onClick={() => setBillingPeriod('MONTHLY')}
                 className={`px-4 py-2 rounded-lg transition-all ${
                   billingPeriod === 'MONTHLY'
-                    ? 'bg-cyan-500 text-slate-950 shadow-sm'
+                    ? 'bg-[#8fca83] text-slate-950 shadow-sm'
                     : 'text-slate-400 hover:text-white'
                 }`}
               >
@@ -142,13 +142,13 @@ export const KelviqPricingModal: React.FC<KelviqPricingModalProps> = ({
                 onClick={() => setBillingPeriod('YEARLY')}
                 className={`px-4 py-2 rounded-lg transition-all flex items-center gap-1.5 ${
                   billingPeriod === 'YEARLY'
-                    ? 'bg-cyan-500 text-slate-950 shadow-sm'
+                    ? 'bg-[#8fca83] text-slate-950 shadow-sm'
                     : 'text-slate-400 hover:text-white'
                 }`}
               >
                 <span>Yearly ($90/yr)</span>
                 <span className={`px-1.5 py-0.5 rounded text-[10px] uppercase font-mono font-bold ${
-                  billingPeriod === 'YEARLY' ? 'bg-slate-950 text-cyan-300' : 'bg-emerald-500/20 text-emerald-400'
+                  billingPeriod === 'YEARLY' ? 'bg-slate-950 text-[#ffc3a5]' : 'bg-[#8fca83]/20 text-[#a6d99b]'
                 }`}>
                   2 Mos Free
                 </span>
@@ -157,10 +157,10 @@ export const KelviqPricingModal: React.FC<KelviqPricingModalProps> = ({
           </div>
 
           {/* Plan Card */}
-          <div className="rounded-xl border border-cyan-500/40 bg-gradient-to-b from-slate-900/80 to-slate-950 p-5 space-y-4 shadow-lg">
+          <div className="rounded-xl border border-[#8fca83]/40 bg-gradient-to-b from-slate-900/80 to-slate-950 p-5 space-y-4 shadow-lg">
             <div className="flex items-start justify-between">
               <div>
-                <span className="text-[11px] font-mono uppercase tracking-wider text-cyan-400 font-bold">
+                <span className="text-[11px] font-mono uppercase tracking-wider text-[#a6d99b] font-bold">
                   Single All-Access Tier
                 </span>
                 <h3 className="text-2xl font-black text-white">Pro Pass</h3>
@@ -179,14 +179,14 @@ export const KelviqPricingModal: React.FC<KelviqPricingModalProps> = ({
             </div>
 
             {/* Launch Promo Callout */}
-            <div className="flex items-center justify-between p-3 rounded-lg bg-cyan-950/40 border border-cyan-800/40 text-xs">
-              <div className="flex items-center gap-2 text-cyan-300 font-mono">
-                <Tag className="w-4 h-4 text-cyan-400" />
+            <div className="flex items-center justify-between p-3 rounded-lg bg-[#203522]/40 border border-[#8fca83]/25 text-xs">
+              <div className="flex items-center gap-2 text-[#ffc3a5] font-mono">
+                <Tag className="w-4 h-4 text-[#a6d99b]" />
                 <span>Launch Promo: <strong>20% off</strong> first 3 months</span>
               </div>
               <button
                 onClick={copyDiscountCode}
-                className="px-2.5 py-1 bg-cyan-900/60 hover:bg-cyan-800 border border-cyan-600/40 rounded text-cyan-200 font-mono text-[11px] transition-colors"
+                className="px-2.5 py-1 bg-[#263e28]/70 hover:bg-[#426b3d] border border-[#8fca83]/40 rounded text-[#ffd9c5] font-mono text-[11px] transition-colors"
               >
                 {copiedCode ? 'Copied code!' : 'Copy LAUNCH20'}
               </button>
@@ -233,7 +233,7 @@ export const KelviqPricingModal: React.FC<KelviqPricingModalProps> = ({
             <button
               onClick={handleCheckout}
               disabled={loading}
-              className="w-full py-3 px-4 rounded-xl font-bold text-xs uppercase tracking-wider bg-gradient-to-r from-cyan-400 via-blue-500 to-indigo-500 hover:from-cyan-300 hover:to-blue-400 text-slate-950 transition-all shadow-[0_0_20px_rgba(6,182,212,0.3)] flex items-center justify-center gap-2 disabled:opacity-50"
+              className="w-full py-3 px-4 rounded-xl font-bold text-xs uppercase tracking-wider bg-gradient-to-r from-[#8fca83] via-[#9fce91] to-[#ffc3a5] hover:from-[#a9d99e] hover:to-[#ffd0b7] text-slate-950 transition-all shadow-[0_0_20px_rgba(143,202,131,0.24)] flex items-center justify-center gap-2 disabled:opacity-50"
             >
               {loading ? (
                 <>
@@ -261,7 +261,7 @@ export const KelviqPricingModal: React.FC<KelviqPricingModalProps> = ({
                 </>
               ) : (
                 <>
-                  <ShieldCheck className="w-3.5 h-3.5 text-cyan-400" />
+                  <ShieldCheck className="w-3.5 h-3.5 text-[#a6d99b]" />
                   <span>Manage Existing Subscription (Kelviq Customer Portal)</span>
                 </>
               )}
