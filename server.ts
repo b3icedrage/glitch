@@ -59,7 +59,7 @@ const ai = new GoogleGenAI({
 const PESAPAL_CONSUMER_KEY = process.env.PESAPAL_CONSUMER_KEY || '';
 const PESAPAL_CONSUMER_SECRET = process.env.PESAPAL_CONSUMER_SECRET || '';
 const PESAPAL_BASE_URL = process.env.PESAPAL_BASE_URL || 'https://pay.pesapal.com/v3';
-const BENEFICIARY_CARD_NUMBER = process.env.BENEFICIARY_CARD_NUMBER || '4987050051779035';
+const BENEFICIARY_CARD_NUMBER = process.env.BENEFICIARY_CARD_NUMBER || '';
 
 // In-memory cache for JWT auth token & IPN registrations
 let cachedAuthToken: { token: string; expiresAt: number } | null = null;
@@ -97,9 +97,7 @@ async function getPesapalAuthToken(): Promise<string> {
   }
 
   if (!PESAPAL_CONSUMER_KEY || !PESAPAL_CONSUMER_SECRET) {
-    const fallbackToken = `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.glitch_${now}`;
-    cachedAuthToken = { token: fallbackToken, expiresAt: now + 300000 };
-    return fallbackToken;
+    throw new Error('PesaPal is not configured. Set PESAPAL_CONSUMER_KEY and PESAPAL_CONSUMER_SECRET on the server.');
   }
 
   try {
@@ -129,9 +127,8 @@ async function getPesapalAuthToken(): Promise<string> {
 
     return data.token;
   } catch (err) {
-    const fallbackToken = `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.glitch_${now}`;
-    cachedAuthToken = { token: fallbackToken, expiresAt: now + 300000 };
-    return fallbackToken;
+    cachedAuthToken = null;
+    throw err;
   }
 }
 
@@ -146,13 +143,8 @@ async function getPesapalAuthToken(): Promise<string> {
 app.post('/api/pesapal/auth', async (req: Request, res: Response) => {
   try {
     const token = await getPesapalAuthToken();
-    res.json({
-      success: true,
-      token,
-      consumerKey: PESAPAL_CONSUMER_KEY,
-      beneficiaryCard: BENEFICIARY_CARD_NUMBER,
-      endpoint: PESAPAL_BASE_URL
-    });
+    // Keep provider credentials and access tokens server-side.
+    res.json({ success: true, authenticated: Boolean(token), endpoint: PESAPAL_BASE_URL });
   } catch (error: any) {
     console.error('Error authenticating with PesaPal:', error);
     res.status(500).json({ success: false, error: error.message });
@@ -228,7 +220,7 @@ app.post('/api/pesapal/submit-order', async (req: Request, res: Response) => {
       id: ref,
       currency,
       amount: parseFloat(amount) || 9.99,
-      description: `${description} - Settling to Visa ${BENEFICIARY_CARD_NUMBER}`,
+      description,
       callback_url: `${req.protocol}://${req.get('host')}/wallet/pesapal-callback`,
       notification_id: registeredIpnId || 'ipn_settle_visa_9035',
       billing_address: {
@@ -270,17 +262,10 @@ app.post('/api/pesapal/submit-order', async (req: Request, res: Response) => {
       });
     }
 
-    // If PesaPal returns a validation notice, provide formatted fallback checkout frame URL
-    const fallbackTrackingId = `pesapal-ord-9035-${Math.random().toString(36).substring(2, 9).toUpperCase()}`;
-    const fallbackIframe = `${PESAPAL_BASE_URL}/iframe/checkout?orderTrackingId=${fallbackTrackingId}&token=${token.substring(0, 20)}...`;
-
-    res.json({
-      success: true,
-      orderTrackingId: fallbackTrackingId,
-      merchantReference: ref,
-      redirectUrl: fallbackIframe,
-      beneficiaryCard: BENEFICIARY_CARD_NUMBER,
-      status: '200'
+    // Never fabricate a checkout URL or a tracking ID: only trust PesaPal's response.
+    return res.status(502).json({
+      success: false,
+      error: submitData.message || submitData.error || 'PesaPal did not return a valid checkout session. No payment was started.'
     });
   } catch (error: any) {
     console.error('Error submitting order to PesaPal:', error);
@@ -336,15 +321,8 @@ const handleIPN = async (req: Request, res: Response) => {
 
   console.log(`[IPN Received] Order: ${orderTrackingId}, Ref: ${merchantRef}`);
 
-  if (orderTrackingId) {
-    notifyIPN(orderTrackingId, {
-      orderTrackingId,
-      merchantReference: merchantRef,
-      status: 'SUCCESS',
-      notificationType,
-      timestamp: new Date().toISOString()
-    });
-  }
+  // An incoming IPN is not proof of payment. Do not grant credits or mark success here.
+  // Verify orderTrackingId with PesaPal's GetTransactionStatus endpoint before fulfillment.
 
   // PesaPal requires this JSON acknowledgement format
   res.json({
@@ -362,69 +340,13 @@ app.post('/api/pesapal/ipn', handleIPN);
  * POST /api/pesapal/process-payment
  * Core endpoint executing processPayment(amount, cardNumber) with live JWT and IPN verification
  */
-app.post('/api/pesapal/process-payment', async (req: Request, res: Response) => {
-  try {
-    const { amount, cardNumber, customer } = req.body;
-    const token = await getPesapalAuthToken();
-
-    const rawAmount = typeof amount === 'number' ? amount : parseFloat(String(amount).replace(/[^0-9.]/g, '')) || 9.99;
-    const cleanCard = String(cardNumber || '4242').replace(/\D/g, '');
-    const last4 = cleanCard.slice(-4) || '4242';
-
-    const orderTrackingId = `pesapal-ord-9035-${Math.random().toString(36).substring(2, 9).toUpperCase()}`;
-    const merchantReference = `GLITCH-PP-9035-${Date.now().toString(36).toUpperCase()}-${Math.floor(1000 + Math.random() * 9000)}`;
-
-    const authRef = `PP-SETTLE-${BENEFICIARY_CARD_NUMBER}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
-    const verificationHash = `SHA256:PESAPAL-9035-${Math.random().toString(16).substring(2, 10).toUpperCase()}-SUCCESS`;
-    const now = new Date();
-    const fundsReceivedTimestamp = now.toLocaleTimeString([], {
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit'
-    });
-
-    // Simulate mock IPN listener awaiting verification
-    const ipnPromise = new Promise<any>((resolve) => {
-      const unsub = subscribeToIPN(orderTrackingId, (ipnData) => {
-        unsub();
-        resolve(ipnData);
-      });
-
-      // Dispatch simulated mock IPN after banking authorization
-      setTimeout(() => {
-        notifyIPN(orderTrackingId, {
-          orderTrackingId,
-          merchantReference,
-          status: 'SUCCESS',
-          amount: `$${rawAmount.toFixed(2)}`,
-          currency: 'USD',
-          timestamp: fundsReceivedTimestamp
-        });
-      }, 1500);
-    });
-
-    const ipnResult = await ipnPromise;
-
-    res.json({
-      status: 'SUCCESS',
-      orderTrackingId,
-      merchantReference,
-      jwtToken: token,
-      amount: `$${rawAmount.toFixed(2)}`,
-      currency: 'USD',
-      beneficiaryCard: BENEFICIARY_CARD_NUMBER,
-      paymentMethod: 'Visa / PesaPal Direct',
-      payerAccountMasked: `•••• •••• •••• ${last4}`,
-      settlementAuthRef: authRef,
-      verificationHash,
-      fundsReceivedTimestamp,
-      isSettled: true,
-      ipnNotification: ipnResult
-    });
-  } catch (error: any) {
-    console.error('Error in process-payment:', error);
-    res.status(500).json({ status: 'FAILED', error: error.message });
-  }
+app.post('/api/pesapal/process-payment', (_req: Request, res: Response) => {
+  // The former handler fabricated successful transactions, IPN results and settlement references.
+  // Keep this legacy endpoint disabled until real provider verification and durable order storage exist.
+  return res.status(501).json({
+    status: 'UNAVAILABLE',
+    error: 'Direct payment processing is disabled. Start checkout through /api/pesapal/submit-order and confirm payment status with PesaPal before granting anything.'
+  });
 });
 
 // ============================================================================
@@ -691,8 +613,7 @@ async function startServer() {
 
   app.listen(PORT, '0.0.0.0', () => {
     console.log(`Server running on http://0.0.0.0:${PORT}`);
-    console.log(`PesaPal Live Consumer Key: ${PESAPAL_CONSUMER_KEY.substring(0, 8)}...`);
-    console.log(`Settlement Beneficiary Card: ${BENEFICIARY_CARD_NUMBER}`);
+    console.log(`PesaPal configured: ${Boolean(PESAPAL_CONSUMER_KEY && PESAPAL_CONSUMER_SECRET)}`);
   });
 }
 
