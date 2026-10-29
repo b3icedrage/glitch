@@ -28,6 +28,7 @@ interface FeedViewProps {
   onNavigateToMessages?: (creatorId?: string) => void;
   onToggleFollow: (userId: string) => void;
   followedUserIds: Set<string>;
+  onUpdatePost?: (postId: string, updates: Partial<FeedPost>) => void;
 }
 
 export const FeedView: React.FC<FeedViewProps> = ({
@@ -42,12 +43,15 @@ export const FeedView: React.FC<FeedViewProps> = ({
   onNavigateToTube,
   onNavigateToMessages,
   onToggleFollow,
-  followedUserIds
+  followedUserIds,
+  onUpdatePost
 }) => {
   const [localPosts, setLocalPosts] = useState<FeedPost[]>(posts);
   const [carouselIndexes, setCarouselIndexes] = useState<Record<string, number>>({});
   const [doubleTapHearts, setDoubleTapHearts] = useState<Record<string, boolean>>({});
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  React.useEffect(() => setLocalPosts(posts), [posts]);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -55,19 +59,14 @@ export const FeedView: React.FC<FeedViewProps> = ({
   };
 
   const handleToggleLike = (postId: string) => {
-    setLocalPosts(prev =>
-      prev.map(p => {
-        if (p.id === postId) {
-          const isLiked = !p.isLiked;
-          return {
-            ...p,
-            isLiked,
-            likesCount: isLiked ? p.likesCount + 1 : p.likesCount - 1
-          };
-        }
-        return p;
-      })
-    );
+    const post = localPosts.find((item) => item.id === postId);
+    if (!post) return;
+    const isLiked = !post.isLiked;
+    const likesCount = Math.max(0, post.likesCount + (isLiked ? 1 : -1));
+    setLocalPosts((prev) => prev.map((item) =>
+      item.id === postId ? { ...item, isLiked, likesCount } : item
+    ));
+    onUpdatePost?.(postId, { isLiked, likesCount });
   };
 
   const handleDoubleTap = (postId: string) => {
@@ -93,23 +92,31 @@ export const FeedView: React.FC<FeedViewProps> = ({
   };
 
   const handleToggleSave = (postId: string) => {
-    setLocalPosts(prev =>
-      prev.map(p => {
-        if (p.id === postId) {
-          const isSaved = !p.isSaved;
-          if (isSaved) showToast('Post saved to your collection');
-          return { ...p, isSaved };
-        }
-        return p;
-      })
-    );
+    const post = localPosts.find((item) => item.id === postId);
+    if (!post) return;
+    const isSaved = !post.isSaved;
+    if (isSaved) showToast('Post saved to your collection');
+    setLocalPosts((prev) => prev.map((item) =>
+      item.id === postId ? { ...item, isSaved } : item
+    ));
+    onUpdatePost?.(postId, { isSaved });
   };
 
-  const handleShare = (post: FeedPost) => {
-    if (navigator.clipboard) {
-      navigator.clipboard.writeText(`https://glitch.network/p/${post.id}`);
+  const handleShare = async (post: FeedPost) => {
+    const url = `${window.location.origin}/p/${post.id}`;
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: 'GLITCH post', text: post.caption, url });
+        showToast('Thanks for sharing this post');
+      } else if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(url);
+        showToast('Post link copied to clipboard');
+      } else {
+        showToast('Sharing is not supported by this browser');
+      }
+    } catch (error) {
+      if ((error as DOMException).name !== 'AbortError') showToast('Could not share this post');
     }
-    showToast('Link copied to clipboard!');
   };
 
   const nextCarousel = (postId: string, total: number) => {
