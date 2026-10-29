@@ -54,9 +54,31 @@ function readStoredState<T>(key: string, fallback: T): T {
   }
 }
 
+function containsTemporaryMedia(value: unknown): boolean {
+  if (typeof value === 'string') return value.startsWith('blob:');
+  if (Array.isArray(value)) return value.some(containsTemporaryMedia);
+  if (value && typeof value === 'object') return Object.values(value as Record<string, unknown>).some(containsTemporaryMedia);
+  return false;
+}
+
+function sanitizeStoredState(value: unknown): unknown {
+  if (Array.isArray(value)) {
+    // Object URLs stop working after refresh, so don't persist locally uploaded media entries.
+    return value.filter((item) => !containsTemporaryMedia(item)).map(sanitizeStoredState);
+  }
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(
+      Object.entries(value as Record<string, unknown>)
+        .filter(([, item]) => !(typeof item === 'string' && item.startsWith('blob:')))
+        .map(([key, item]) => [key, sanitizeStoredState(item)])
+    );
+  }
+  return value;
+}
+
 function writeStoredState(key: string, value: unknown) {
   try {
-    window.localStorage.setItem(key, JSON.stringify(value));
+    window.localStorage.setItem(key, JSON.stringify(sanitizeStoredState(value)));
   } catch (error) {
     console.warn(`Could not save ${key} locally:`, error);
   }
