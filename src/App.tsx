@@ -139,13 +139,31 @@ export default function App() {
     }
 
     fetch('/api/kelviq/entitlements')
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.isPro) {
-          setIsPro(true);
+      .then(async (res) => {
+        const contentType = res.headers.get('content-type') || '';
+        const body = await res.text();
+        if (!contentType.includes('application/json')) {
+          throw new Error(`Entitlements API returned ${res.status} non-JSON content. The deployment may not be routing /api requests to the server.`);
         }
+        let data: any;
+        try {
+          data = JSON.parse(body);
+        } catch {
+          throw new Error('Entitlements API returned invalid JSON.');
+        }
+        if (!res.ok) {
+          throw new Error(data.error || `Entitlements request failed (${res.status}).`);
+        }
+        return data;
       })
-      .catch((err) => console.warn('Could not fetch entitlements:', err));
+      .then((data) => {
+        setIsPro(Boolean(data.isPro));
+      })
+      .catch((err) => {
+        console.warn('Could not fetch entitlements:', err);
+        setBillingToast('Billing status is temporarily unavailable. Please retry later.');
+        setTimeout(() => setBillingToast(null), 5000);
+      });
   }, []);
 
   const handleSelectMode = (mode: PlatformMode) => {
