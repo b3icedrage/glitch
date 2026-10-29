@@ -212,3 +212,23 @@
     box-shadow: none !important;
   }
 }
+
+
+/* Palette bridge for legacy Tailwind utility classes used across older views. */
+[class*="text-cyan-"], [class*="text-blue-"], [class*="text-indigo-"], [class*="text-fuchsia-"] {
+  color: #a6d99b !important;
+}
+[class*="border-cyan-"], [class*="border-blue-"], [class*="border-indigo-"], [class*="border-fuchsia-"] {
+  border-color: rgba(143, 202, 131, 0.42) !important;
+}
+[class*="bg-cyan-"], [class*="bg-blue-"], [class*="bg-indigo-"], [class*="bg-fuchsia-"] {
+  background-color: #203522 !important;
+}
+[class*="from-cyan-"], [class*="from-blue-"], [class*="from-indigo-"], [class*="from-fuchsia-"] {
+  --tw-gradient-from: #8fca83 var(--tw-gradient-from-position) !important;
+  --tw-gradient-to: rgb(143 202 131 / 0) var(--tw-gradient-to-position) !important;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
+}
+[class*="to-cyan-"], [class*="to-blue-"], [class*="to-indigo-"], [class*="to-fuchsia-"] {
+  --tw-gradient-to: #ffc3a5 var(--tw-gradient-to-position) !important;
+}
