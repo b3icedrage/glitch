@@ -6,12 +6,12 @@
     --font-display: 'Outfit', sans-serif;
     --font-body: 'Plus Jakarta Sans', sans-serif;
     --font-mono: 'JetBrains Mono', monospace;
-    --color-canvas: #080910;
-    --color-panel: #10121b;
-    --color-line: rgba(148, 163, 184, 0.14);
-    --color-muted: #9298aa;
-    --color-cyan: #67e8f9;
-    --color-pink: #f0abfc;
+    --color-canvas: #0b100c;
+    --color-panel: #151c16;
+    --color-line: rgba(164, 190, 157, 0.18);
+    --color-muted: #b2b9ad;
+    --color-cyan: #8fca83;
+    --color-pink: #ffc3a5;
     font-synthesis: none;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
@@ -39,10 +39,10 @@
     margin: 0;
     font-family: var(--font-body);
     background:
-      radial-gradient(ellipse at 14% -12%, rgba(34, 211, 238, 0.075), transparent 38rem),
-      radial-gradient(ellipse at 92% 0%, rgba(217, 70, 239, 0.06), transparent 34rem),
+      radial-gradient(ellipse at 14% -12%, rgba(108, 169, 92, 0.13), transparent 38rem),
+      radial-gradient(ellipse at 92% 0%, rgba(255, 185, 148, 0.12), transparent 34rem),
       var(--color-canvas);
-    color: #f1f5f9;
+    color: #f3f5ee;
     overflow-x: clip;
   }
 
@@ -82,8 +82,8 @@
   }
 
   ::selection {
-    color: #071018;
-    background: rgba(103, 232, 249, 0.88);
+    color: #182017;
+    background: rgba(255, 195, 165, 0.9);
   }
 
   :focus-visible {
@@ -105,18 +105,18 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(15, 23, 42, 0.42);
+  background: rgba(21, 32, 22, 0.55);
 }
 
 ::-webkit-scrollbar-thumb {
   border: 2px solid transparent;
   border-radius: 9999px;
-  background: rgba(148, 163, 184, 0.28);
+  background: rgba(164, 190, 157, 0.32);
   background-clip: padding-box;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(103, 232, 249, 0.42);
+  background: rgba(143, 202, 131, 0.48);
   background-clip: padding-box;
 }
 
@@ -132,7 +132,7 @@
 /* Reusable finishing touches for panels and interactive surfaces. */
 .glass-panel {
   border: 1px solid var(--color-line);
-  background: rgba(16, 18, 27, 0.76);
+  background: rgba(21, 28, 22, 0.82);
   box-shadow: 0 18px 55px rgba(0, 0, 0, 0.22);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
@@ -147,7 +147,7 @@
 }
 
 .interactive-surface:hover {
-  border-color: rgba(103, 232, 249, 0.3);
+  border-color: rgba(143, 202, 131, 0.36);
 }
 
 .interactive-surface:active {
