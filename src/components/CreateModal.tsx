@@ -200,7 +200,7 @@ export const CreateModal: React.FC<CreateModalProps> = ({
               
               <button
                 type="button"
-                onClick={() => setContentType('spark')}
+                onClick={() => { setContentType('spark'); setUploadedMedia(null); }}
                 className={`flex flex-col items-center justify-center p-3 rounded-2xl border transition-all text-xs font-medium ${
                   contentType === 'spark'
                     ? 'bg-fuchsia-950/40 border-fuchsia-500 text-white shadow-md shadow-fuchsia-500/10'
@@ -214,7 +214,7 @@ export const CreateModal: React.FC<CreateModalProps> = ({
 
               <button
                 type="button"
-                onClick={() => setContentType('feed')}
+                onClick={() => { setContentType('feed'); setUploadedMedia(null); }}
                 className={`flex flex-col items-center justify-center p-3 rounded-2xl border transition-all text-xs font-medium ${
                   contentType === 'feed'
                     ? 'bg-indigo-950/40 border-cyan-400 text-white shadow-md shadow-cyan-500/10'
@@ -228,7 +228,7 @@ export const CreateModal: React.FC<CreateModalProps> = ({
 
               <button
                 type="button"
-                onClick={() => setContentType('tube')}
+                onClick={() => { setContentType('tube'); setUploadedMedia(null); }}
                 className={`flex flex-col items-center justify-center p-3 rounded-2xl border transition-all text-xs font-medium ${
                   contentType === 'tube'
                     ? 'bg-red-950/40 border-red-500 text-white shadow-md shadow-red-500/10'
@@ -242,7 +242,7 @@ export const CreateModal: React.FC<CreateModalProps> = ({
 
               <button
                 type="button"
-                onClick={() => setContentType('story')}
+                onClick={() => { setContentType('story'); setUploadedMedia(null); }}
                 className={`flex flex-col items-center justify-center p-3 rounded-2xl border transition-all text-xs font-medium ${
                   contentType === 'story'
                     ? 'bg-amber-950/40 border-amber-400 text-white shadow-md shadow-amber-500/10'
