@@ -76,19 +76,15 @@ export const FeedView: React.FC<FeedViewProps> = ({
       setDoubleTapHearts(prev => ({ ...prev, [postId]: false }));
     }, 900);
 
-    // If not already liked, toggle to liked
-    setLocalPosts(prev =>
-      prev.map(p => {
-        if (p.id === postId && !p.isLiked) {
-          return {
-            ...p,
-            isLiked: true,
-            likesCount: p.likesCount + 1
-          };
-        }
-        return p;
-      })
-    );
+    // If not already liked, sync the double-tap like to app state too.
+    const post = localPosts.find((item) => item.id === postId);
+    if (post && !post.isLiked) {
+      const likesCount = post.likesCount + 1;
+      setLocalPosts((prev) => prev.map((item) =>
+        item.id === postId ? { ...item, isLiked: true, likesCount } : item
+      ));
+      onUpdatePost?.(postId, { isLiked: true, likesCount });
+    }
   };
 
   const handleToggleSave = (postId: string) => {
