@@ -27,6 +27,7 @@
 
   html {
     min-width: 320px;
+    width: 100%;
     min-height: 100%;
     scroll-behavior: smooth;
     scrollbar-gutter: stable;
@@ -35,7 +36,9 @@
 
   body {
     min-width: 320px;
+    width: 100%;
     min-height: 100vh;
+    min-height: 100dvh;
     margin: 0;
     font-family: var(--font-body);
     background:
@@ -43,11 +46,14 @@
       radial-gradient(ellipse at 92% 0%, rgba(255, 185, 148, 0.12), transparent 34rem),
       var(--color-canvas);
     color: #f3f5ee;
+    overflow-x: hidden;
     overflow-x: clip;
   }
 
   #root {
+    width: 100%;
     min-height: 100vh;
+    min-height: 100dvh;
     isolation: isolate;
   }
 
