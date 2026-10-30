@@ -1,6 +1,6 @@
 import type { Request, Response } from 'express';
-import { requireSupabaseUser } from '../../src/server/supabaseAuth';
-import { handlePortal } from '../../src/server/kelviq';
+import { requireSupabaseUser } from '../../src/server/supabaseAuth.js';
+import { handlePortal } from '../../src/server/kelviq.js';
 
 export default function handler(req: Request, res: Response) {
   if (req.method !== 'POST') {
