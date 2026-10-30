@@ -47,12 +47,12 @@ export async function requireSupabaseUser(req: Request, res: Response, next: Nex
 
   const rawAuthorization = req.headers.authorization;
   const authorization = Array.isArray(rawAuthorization) ? rawAuthorization[0] || '' : rawAuthorization || '';
-  const match = authorization.match(/^Bearer\\s+(.+)$/i);
+  const token = authorization.toLowerCase().startsWith('bearer ') ? authorization.slice(7).trim() : '';
   if (!token) {
     return res.status(401).json({ success: false, error: 'Sign in is required.' });
   }
 
-  const supabaseUrl = (process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || '').replace(/\\/$/, '');
+  const configuredUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || '';\n  const supabaseUrl = configuredUrl.endsWith('/') ? configuredUrl.slice(0, -1) : configuredUrl;
   const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY || '';
   if (!supabaseUrl || !supabaseAnonKey) {
     return res.status(503).json({ success: false, error: 'Supabase server verification is not configured.' });
