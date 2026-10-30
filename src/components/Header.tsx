@@ -1,4 +1,5 @@
 import React from 'react';
+import { useSupabaseAuth } from '../auth/supabaseAuth';
 import { PlatformMode, User } from '../types';
 import {
   Flame,
@@ -38,6 +39,7 @@ export const Header: React.FC<HeaderProps> = ({
   unreadNotificationsCount = 3,
   unreadMessagesCount = 2,
 }) => {
+  const auth = useSupabaseAuth();
   return (
     <header className="sticky top-0 z-40 bg-[#07080d]/95 backdrop-blur-md border-b border-slate-800/80 px-4 md:px-6 py-2.5 transition-all">
       <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
@@ -178,6 +180,14 @@ export const Header: React.FC<HeaderProps> = ({
                 {unreadNotificationsCount}
               </span>
             )}
+          </button>
+
+          <button
+            onClick={() => { void auth.signOut(); }}
+            className="hidden lg:inline-flex rounded-lg border border-slate-700 px-2.5 py-1.5 text-[11px] font-semibold text-slate-300 hover:border-slate-500 hover:text-white"
+            title={auth.user?.email || 'Signed in'}
+          >
+            Sign out
           </button>
 
           {/* Profile Avatar */}
