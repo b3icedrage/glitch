@@ -1,4 +1,5 @@
 import React from 'react';
+import { ClerkAuthControls } from './ClerkAuthControls';
 import { PlatformMode, User } from '../types';
 import {
   Flame,
@@ -179,6 +180,8 @@ export const Header: React.FC<HeaderProps> = ({
               </span>
             )}
           </button>
+
+          <ClerkAuthControls />
 
           {/* Profile Avatar */}
           <button
