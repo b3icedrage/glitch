@@ -151,7 +151,7 @@ export async function handleCheckout(req: Request, res: Response) {
  */
 export async function handlePortal(req: Request, res: Response) {
   try {
-    const { customerId } = getOrCreateServerCustomerId(req, res);
+    const { customerId } = getOrCreateServerCustomerId(req);
 
     try {
       const portalSession = await kelviq.portal.createSession({
@@ -184,7 +184,7 @@ export async function handlePortal(req: Request, res: Response) {
  */
 export async function handleGetEntitlements(req: Request, res: Response) {
   try {
-    const { customerId, email } = getOrCreateServerCustomerId(req, res);
+    const { customerId, email } = getOrCreateServerCustomerId(req);
 
     const [specialGrade, unlimitedStory] = await Promise.all([
       hasFeature(customerId, 'special-grade-access'),
@@ -225,7 +225,7 @@ export async function handleGetEntitlements(req: Request, res: Response) {
  */
 export async function handleReportUsage(req: Request, res: Response) {
   try {
-    const { customerId } = getOrCreateServerCustomerId(req, res);
+    const { customerId } = getOrCreateServerCustomerId(req);
     const { credits = 1 } = req.body;
 
     await kelviq.reporting.reportUsage({
