@@ -44,6 +44,7 @@ import { NotificationsDrawer } from './components/NotificationsDrawer';
 import { StoryViewerModal } from './components/StoryViewerModal';
 import { SoundHubModal } from './components/SoundHubModal';
 import { KelviqPricingModal } from './components/KelviqPricingModal';
+import { ClerkAuthControls } from './components/ClerkAuthControls';
 
 function readStoredState<T>(key: string, fallback: T): T {
   try {
@@ -288,6 +289,10 @@ export default function App() {
   return (
     <div className="min-h-screen bg-[#0b100c] text-[#f3f5ee] flex flex-col font-['Plus_Jakarta_Sans'] selection:bg-[#ffc3a5] selection:text-[#182017]">
       
+      <div className="fixed right-3 top-3 z-[60] md:right-6">
+        <ClerkAuthControls />
+      </div>
+
       {/* Top Header */}
       <Header
         currentMode={currentMode}
