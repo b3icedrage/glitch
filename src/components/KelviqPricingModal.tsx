@@ -132,14 +132,14 @@ export const KelviqPricingModal: React.FC<KelviqPricingModalProps> = ({
             </div>
             <div>
               <h2 className="text-base font-bold text-white flex items-center gap-2">
-                Kelviq Production Billing
+                Glitch Creator Pro
                 {isPro && (
                   <span className="px-2 py-0.5 rounded-full bg-[#8fca83]/20 text-[#a6d99b] text-[10px] font-mono border border-emerald-500/30">
                     Active Subscriber
                   </span>
                 )}
               </h2>
-              <p className="text-xs text-slate-400">Official live billing catalog & entitlements</p>
+              <p className="text-xs text-slate-400">Unlock more tools to create, publish, and grow on Glitch.</p>
             </div>
           </div>
           <button
@@ -189,11 +189,11 @@ export const KelviqPricingModal: React.FC<KelviqPricingModalProps> = ({
             <div className="flex items-start justify-between">
               <div>
                 <span className="text-[11px] font-mono uppercase tracking-wider text-[#a6d99b] font-bold">
-                  Single All-Access Tier
+                  CREATOR MEMBERSHIP
                 </span>
-                <h3 className="text-2xl font-black text-white">Pro Pass</h3>
+                <h3 className="text-2xl font-black text-white">Creator Pro</h3>
                 <p className="text-xs text-slate-400 mt-1">
-                  Full unrestricted access to combat, AI autopilot, and campaign modes.
+                  More creative power for your posts, short videos, stories, and channel content.
                 </p>
               </div>
               <div className="text-right">
@@ -227,7 +227,7 @@ export const KelviqPricingModal: React.FC<KelviqPricingModalProps> = ({
                   <Check className="w-3 h-3 text-emerald-400" />
                 </div>
                 <span>
-                  <strong className="text-white">Advanced AI Combat:</strong> Take on Special Grade challenges, boss encounters, and Domain Expansion battles.
+                  <strong className="text-white">AI Creator Toolkit:</strong> Generate stronger captions, hooks, hashtags, and fresh content ideas with AI.
                 </span>
               </div>
               <div className="flex items-center gap-2.5">
@@ -235,7 +235,7 @@ export const KelviqPricingModal: React.FC<KelviqPricingModalProps> = ({
                   <Check className="w-3 h-3 text-emerald-400" />
                 </div>
                 <span>
-                  <strong className="text-white">Full Story & Dojo Access:</strong> Play the story campaign, unlock battle stages, and train in the Cursed Dojo.
+                  <strong className="text-white">More Ways to Create:</strong> Create and share across Sparks, Stories, the social feed, and Glitch Cinema.
                 </span>
               </div>
               <div className="flex items-center gap-2.5">
@@ -243,7 +243,7 @@ export const KelviqPricingModal: React.FC<KelviqPricingModalProps> = ({
                   <Check className="w-3 h-3 text-emerald-400" />
                 </div>
                 <span>
-                  <strong className="text-white">500 AI Compute Credits / month:</strong> A monthly allowance for AI-powered simulations and features.
+                  <strong className="text-white">500 AI Creator Credits / month:</strong> Use your monthly credits for AI-assisted content creation and creator tools.
                 </span>
               </div>
             </div>
@@ -271,7 +271,7 @@ export const KelviqPricingModal: React.FC<KelviqPricingModalProps> = ({
               ) : (
                 <>
                   <CreditCard className="w-4 h-4" />
-                  <span>Proceed to Kelviq Production Checkout ({billingPeriod === 'MONTHLY' ? '$9/mo' : '$90/yr'})</span>
+                  <span>Get Creator Pro ({billingPeriod === 'MONTHLY' ? '$9/mo' : '$90/yr'})</span>
                   <ExternalLink className="w-3.5 h-3.5" />
                 </>
               )}
