@@ -41,11 +41,11 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   const auth = useSupabaseAuth();
   return (
-    <header className="sticky top-0 z-40 bg-[#07080d]/95 backdrop-blur-md border-b border-slate-800/80 px-4 md:px-6 py-2.5 transition-all">
-      <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
+    <header className="sticky top-0 z-40 bg-[#07080d]/95 backdrop-blur-md border-b border-slate-800/80 px-2.5 sm:px-4 md:px-6 py-2.5 transition-all">
+      <div className="max-w-7xl mx-auto flex items-center justify-between gap-2 sm:gap-4 min-w-0">
         
         {/* Brand Logo & Tagline */}
-        <div className="flex items-center gap-3 shrink-0">
+        <div className="flex items-center gap-2 shrink-0 min-w-0">
           <button
             onClick={() => onSelectMode('sparks')}
             className="flex items-center gap-2 group text-left"
@@ -124,12 +124,12 @@ export const Header: React.FC<HeaderProps> = ({
         </nav>
 
         {/* Right Actions & Profile */}
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-1 sm:gap-2.5 shrink-0">
           
           {/* Create Button (+) */}
           <button
             onClick={onOpenCreate}
-            className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-cyan-400 via-fuchsia-500 to-pink-500 hover:opacity-90 text-slate-950 font-bold text-xs flex items-center gap-1.5 shadow-[0_0_15px_rgba(236,72,153,0.3)] transition-all active:scale-95"
+            className="px-2.5 sm:px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-cyan-400 via-fuchsia-500 to-pink-500 hover:opacity-90 text-slate-950 font-bold text-xs flex items-center gap-1.5 shadow-[0_0_15px_rgba(236,72,153,0.3)] transition-all active:scale-95"
             title="Create & Upload Video"
           >
             <Plus className="w-4 h-4 text-slate-950 stroke-[3]" />
@@ -139,7 +139,7 @@ export const Header: React.FC<HeaderProps> = ({
           {/* Kelviq Pro Billing Button */}
           <button
             onClick={onOpenPricing}
-            className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold flex items-center gap-1.5 transition-all border ${
+            className={`hidden sm:flex px-3 py-1.5 rounded-xl text-xs font-mono font-bold flex items-center gap-1.5 transition-all border ${
               isPro
                 ? 'bg-emerald-950/80 border-emerald-500/50 text-emerald-300'
                 : 'bg-gradient-to-r from-amber-500/20 to-orange-500/20 border-amber-500/40 text-amber-300 hover:from-amber-500/30'
@@ -184,7 +184,7 @@ export const Header: React.FC<HeaderProps> = ({
 
           <button
             onClick={() => { void auth.signOut(); }}
-            className="inline-flex rounded-lg border border-slate-700 px-2 py-1.5 text-[10px] font-semibold text-slate-300 hover:border-slate-500 hover:text-white"
+            className="hidden sm:inline-flex rounded-lg border border-slate-700 px-2 py-1.5 text-[10px] font-semibold text-slate-300 hover:border-slate-500 hover:text-white"
             title={auth.user?.email || 'Signed in'}
           >
             Sign out
