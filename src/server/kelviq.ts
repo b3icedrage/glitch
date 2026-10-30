@@ -14,10 +14,19 @@ if (!serverApiKey) {
   console.warn('[Kelviq] WARNING: KELVIQ_SERVER_API_KEY is not set in environment.');
 }
 
-export const kelviq = new Kelviq({
-  accessToken: serverApiKey,
-  environment: environmentFromEnv(),
-});
+// Do not initialize the SDK with an empty token: its constructor throws and
+// would crash every serverless function that imports this module. Billing
+// routes return a controlled 503 until the server key is configured.
+export const kelviq = serverApiKey
+  ? new Kelviq({
+      accessToken: serverApiKey,
+      environment: environmentFromEnv(),
+    })
+  : null;
+
+export function isKelviqConfigured(): boolean {
+  return kelviq !== null;
+}
 
 // Allowed plan identifier from published production catalog
 export const ALLOWED_PLAN_IDENTIFIER = 'starter-plan';
@@ -59,6 +68,7 @@ export function getOrCreateServerCustomerId(req: Request): { customerId: string;
  * before creating checkout or portal sessions.
  */
 export async function ensureCustomerExists(customerId: string, email: string, name: string): Promise<void> {
+  if (!kelviq) throw new Error('Billing is not configured on the server.');
   try {
     await kelviq.customers.create({
       customerId,
@@ -86,6 +96,7 @@ export async function ensureCustomerExists(customerId: string, email: string, na
  * Fails closed (returns false) if an error occurs.
  */
 export async function hasFeature(customerId: string, featureId: string): Promise<boolean> {
+  if (!kelviq) return false;
   try {
     const hasAccess = await kelviq.entitlements.hasAccess({
       customerId,
@@ -104,6 +115,9 @@ export async function hasFeature(customerId: string, featureId: string): Promise
  * Creates a checkout session for the signed-in user.
  */
 export async function handleCheckout(req: Request, res: Response) {
+  if (!kelviq) {
+    return res.status(503).json({ success: false, error: 'Billing is not configured on the server.' });
+  }
   try {
     const { customerId, email, name } = getOrCreateServerCustomerId(req);
     const { chargePeriod = 'MONTHLY' } = req.body;
@@ -150,6 +164,9 @@ export async function handleCheckout(req: Request, res: Response) {
  * Creates a Customer Portal session for managing subscriptions.
  */
 export async function handlePortal(req: Request, res: Response) {
+  if (!kelviq) {
+    return res.status(503).json({ success: false, error: 'Billing is not configured on the server.' });
+  }
   try {
     const { customerId } = getOrCreateServerCustomerId(req);
 
@@ -224,6 +241,9 @@ export async function handleGetEntitlements(req: Request, res: Response) {
  * Reports METER feature usage (e.g. AI compute credits).
  */
 export async function handleReportUsage(req: Request, res: Response) {
+  if (!kelviq) {
+    return res.status(503).json({ success: false, error: 'Billing is not configured on the server.' });
+  }
   try {
     const { customerId } = getOrCreateServerCustomerId(req);
     const { credits = 1 } = req.body;
