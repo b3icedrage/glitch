@@ -14,10 +14,19 @@ if (!serverApiKey) {
   console.warn('[Kelviq] WARNING: KELVIQ_SERVER_API_KEY is not set in environment.');
 }
 
-export const kelviq = new Kelviq({
-  accessToken: serverApiKey,
-  environment: environmentFromEnv(),
-});
+// Do not initialize the SDK with an empty token: its constructor throws and
+// would crash every serverless function that imports this module. Billing
+// routes return a controlled 503 until the server key is configured.
+export const kelviq = serverApiKey
+  ? new Kelviq({
+      accessToken: serverApiKey,
+      environment: environmentFromEnv(),
+    })
+  : null;
+
+export function isKelviqConfigured(): boolean {
+  return kelviq !== null;
+}
 
 // Allowed plan identifier from published production catalog
 export const ALLOWED_PLAN_IDENTIFIER = 'starter-plan';
@@ -32,27 +41,26 @@ const processedWebhookEventIds = new Set<string>();
  * Server-side helper to resolve or generate the signed-in user's customerId.
  * Never read from request body or query params.
  */
-export function getOrCreateServerCustomerId(req: Request, res?: Response): { customerId: string; email: string; name: string } {
-  // Read customerId from cookies or header if set
-  const cookiesHeader = req.headers.cookie || '';
-  const matchId = cookiesHeader.match(/kelviq_customer_id=([^;]+)/);
-  const matchEmail = cookiesHeader.match(/kelviq_customer_email=([^;]+)/);
+export function getOrCreateServerCustomerId(req: Request): { customerId: string; email: string; name: string } {
+  const user = (req as any).supabaseUser as {
+    id?: string;
+    email?: string;
+    user_metadata?: Record<string, unknown>;
+  } | undefined;
 
-  let customerId = matchId ? decodeURIComponent(matchId[1]) : '';
-  let email = matchEmail ? decodeURIComponent(matchEmail[1]) : 'alex.rivera@glitch.network';
-  const name = 'Alex Rivera';
-
-  if (!customerId) {
-    // Generate deterministic or session customer ID for current user
-    customerId = `usr_glitch_${Math.random().toString(36).substring(2, 10)}`;
-    if (res) {
-      // Set session cookies (httpOnly, path /)
-      res.cookie('kelviq_customer_id', customerId, { httpOnly: true, sameSite: 'lax', maxAge: 365 * 24 * 3600 * 1000 });
-      res.cookie('kelviq_customer_email', email, { httpOnly: true, sameSite: 'lax', maxAge: 365 * 24 * 3600 * 1000 });
-    }
+  if (!user?.id || !user.email) {
+    throw new Error('A verified Supabase user with an email address is required.');
   }
 
-  return { customerId, email, name };
+  // Stable provider-independent mapping: the same Supabase user always resolves
+  // to the same Kelviq customer identifier. Never trust client-supplied IDs.
+  const customerId = `glitch_${user.id}`;
+  const metadataName = user.user_metadata?.full_name || user.user_metadata?.name || user.user_metadata?.display_name;
+  const name = typeof metadataName === 'string' && metadataName.trim()
+    ? metadataName.trim().slice(0, 120)
+    : user.email.split('@')[0];
+
+  return { customerId, email: user.email, name };
 }
 
 /**
@@ -60,6 +68,7 @@ export function getOrCreateServerCustomerId(req: Request, res?: Response): { cus
  * before creating checkout or portal sessions.
  */
 export async function ensureCustomerExists(customerId: string, email: string, name: string): Promise<void> {
+  if (!kelviq) throw new Error('Billing is not configured on the server.');
   try {
     await kelviq.customers.create({
       customerId,
@@ -87,6 +96,7 @@ export async function ensureCustomerExists(customerId: string, email: string, na
  * Fails closed (returns false) if an error occurs.
  */
 export async function hasFeature(customerId: string, featureId: string): Promise<boolean> {
+  if (!kelviq) return false;
   try {
     const hasAccess = await kelviq.entitlements.hasAccess({
       customerId,
@@ -105,8 +115,11 @@ export async function hasFeature(customerId: string, featureId: string): Promise
  * Creates a checkout session for the signed-in user.
  */
 export async function handleCheckout(req: Request, res: Response) {
+  if (!kelviq) {
+    return res.status(503).json({ success: false, error: 'Billing is not configured on the server.' });
+  }
   try {
-    const { customerId, email, name } = getOrCreateServerCustomerId(req, res);
+    const { customerId, email, name } = getOrCreateServerCustomerId(req);
     const { chargePeriod = 'MONTHLY' } = req.body;
 
     // Validate charge period strictly
@@ -151,8 +164,11 @@ export async function handleCheckout(req: Request, res: Response) {
  * Creates a Customer Portal session for managing subscriptions.
  */
 export async function handlePortal(req: Request, res: Response) {
+  if (!kelviq) {
+    return res.status(503).json({ success: false, error: 'Billing is not configured on the server.' });
+  }
   try {
-    const { customerId } = getOrCreateServerCustomerId(req, res);
+    const { customerId } = getOrCreateServerCustomerId(req);
 
     try {
       const portalSession = await kelviq.portal.createSession({
@@ -185,7 +201,7 @@ export async function handlePortal(req: Request, res: Response) {
  */
 export async function handleGetEntitlements(req: Request, res: Response) {
   try {
-    const { customerId, email } = getOrCreateServerCustomerId(req, res);
+    const { customerId, email } = getOrCreateServerCustomerId(req);
 
     const [specialGrade, unlimitedStory] = await Promise.all([
       hasFeature(customerId, 'special-grade-access'),
@@ -225,8 +241,11 @@ export async function handleGetEntitlements(req: Request, res: Response) {
  * Reports METER feature usage (e.g. AI compute credits).
  */
 export async function handleReportUsage(req: Request, res: Response) {
+  if (!kelviq) {
+    return res.status(503).json({ success: false, error: 'Billing is not configured on the server.' });
+  }
   try {
-    const { customerId } = getOrCreateServerCustomerId(req, res);
+    const { customerId } = getOrCreateServerCustomerId(req);
     const { credits = 1 } = req.body;
 
     await kelviq.reporting.reportUsage({

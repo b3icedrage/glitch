@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useSupabaseAuth } from './auth/supabaseAuth';
 import {
   PlatformMode,
   User,
@@ -85,6 +86,7 @@ function writeStoredState(key: string, value: unknown) {
 }
 
 export default function App() {
+  const auth = useSupabaseAuth();
   // Navigation State (defaults to TikTok 'sparks' video feed)
   const [currentMode, setCurrentMode] = useState<PlatformMode>('sparks');
   const [previousMode, setPreviousMode] = useState<PlatformMode>('sparks');
@@ -132,13 +134,14 @@ export default function App() {
 
   // Fetch live Kelviq entitlements & check URL params
   useEffect(() => {
+    if (!auth.session?.access_token) return;
     if (window.location.search.includes('billing=success')) {
       setBillingToast('Checkout returned successfully. Confirming your subscription status…');
       window.history.replaceState({}, document.title, window.location.pathname);
       setTimeout(() => setBillingToast(null), 5000);
     }
 
-    fetch('/api/kelviq/entitlements')
+    fetch('/api/kelviq/entitlements', { headers: { Authorization: `Bearer ${auth.session.access_token}` } })
       .then(async (res) => {
         const contentType = res.headers.get('content-type') || '';
         const body = await res.text();
@@ -164,7 +167,7 @@ export default function App() {
         setBillingToast('Billing status is temporarily unavailable. Please retry later.');
         setTimeout(() => setBillingToast(null), 5000);
       });
-  }, []);
+  }, [auth.session?.access_token]);
 
   const handleSelectMode = (mode: PlatformMode) => {
     setPreviousMode(currentMode);
@@ -277,7 +280,10 @@ export default function App() {
     // Report usage to Kelviq if active
     fetch('/api/kelviq/report-usage', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${auth.session?.access_token || ''}`,
+      },
       body: JSON.stringify({ credits: Math.ceil(amount / 10) }),
     }).catch(() => {});
   };

@@ -1,4 +1,5 @@
 import React from 'react';
+import { useSupabaseAuth } from '../auth/supabaseAuth';
 import { PlatformMode, User } from '../types';
 import {
   Flame,
@@ -38,6 +39,7 @@ export const Header: React.FC<HeaderProps> = ({
   unreadNotificationsCount = 3,
   unreadMessagesCount = 2,
 }) => {
+  const auth = useSupabaseAuth();
   return (
     <header className="sticky top-0 z-40 bg-[#07080d]/95 backdrop-blur-md border-b border-slate-800/80 px-4 md:px-6 py-2.5 transition-all">
       <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
@@ -48,11 +50,11 @@ export const Header: React.FC<HeaderProps> = ({
             onClick={() => onSelectMode('sparks')}
             className="flex items-center gap-2 group text-left"
           >
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-cyan-500 via-fuchsia-500 to-pink-500 p-[2px] shadow-[0_0_15px_rgba(6,182,212,0.3)] group-hover:scale-105 transition-transform">
-              <div className="w-full h-full bg-[#090a0f] rounded-[10px] flex items-center justify-center">
-                <Flame className="w-5 h-5 text-cyan-400 group-hover:text-pink-400 transition-colors" />
-              </div>
-            </div>
+            <img
+              src="/glitch-mark.svg"
+              alt="Glitch"
+              className="w-10 h-10 rounded-xl object-cover shadow-[0_0_18px_rgba(6,182,212,0.22)] group-hover:scale-105 transition-transform"
+            />
             <div>
               <div className="flex items-center gap-1.5">
                 <span className="font-extrabold text-base tracking-tight text-white group-hover:text-cyan-300 transition-colors font-['Plus_Jakarta_Sans']">
@@ -178,6 +180,14 @@ export const Header: React.FC<HeaderProps> = ({
                 {unreadNotificationsCount}
               </span>
             )}
+          </button>
+
+          <button
+            onClick={() => { void auth.signOut(); }}
+            className="inline-flex rounded-lg border border-slate-700 px-2 py-1.5 text-[10px] font-semibold text-slate-300 hover:border-slate-500 hover:text-white"
+            title={auth.user?.email || 'Signed in'}
+          >
+            Sign out
           </button>
 
           {/* Profile Avatar */}
