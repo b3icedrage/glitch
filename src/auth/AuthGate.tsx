@@ -11,7 +11,7 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
   const [error, setError] = useState('');
 
   if (auth.loading) {
-    return <div className="min-h-screen bg-[#0b100c] text-white grid place-items-center">Loading your secure session…</div>;
+    return <div className="min-h-screen min-h-dvh w-full px-4 bg-[#0b100c] text-white grid place-items-center">Loading your secure session…</div>;
   }
 
   if (auth.user) return <>{children}</>;
@@ -40,8 +40,8 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <main className="min-h-screen bg-[#0b100c] text-[#f3f5ee] flex items-center justify-center px-4 py-10">
-      <section className="w-full max-w-md rounded-3xl border border-[#a4be9d]/20 bg-[#151c16] p-7 shadow-2xl">
+    <main className="min-h-screen min-h-dvh w-full bg-[#0b100c] text-[#f3f5ee] flex items-center justify-center px-4 py-[max(1.5rem,env(safe-area-inset-top))]">
+      <section className="w-full max-w-md min-w-0 rounded-3xl border border-[#a4be9d]/20 bg-[#151c16] p-5 sm:p-7 shadow-2xl">
         <div className="mb-7">
           <div className="text-xs font-bold tracking-[0.3em] text-[#8fca83]">GLITCH CREATOR STUDIO</div>
           <h1 className="mt-3 text-3xl font-black">{mode === 'signin' ? 'Welcome back' : mode === 'signup' ? 'Create your account' : 'Reset password'}</h1>
