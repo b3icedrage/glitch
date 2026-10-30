@@ -1,22 +1,21 @@
 import { Request, Response, NextFunction } from 'express';
 
-const SUPABASE_URL = (process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || '').replace(/\/$/, '');
-const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY || '';
-
 export async function requireSupabaseUser(req: Request, res: Response, next: NextFunction) {
   const authorization = req.get('authorization') || '';
   const match = authorization.match(/^Bearer\s+(.+)$/i);
   if (!match) {
     return res.status(401).json({ success: false, error: 'Sign in is required.' });
   }
-  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+  const supabaseUrl = (process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || '').replace(/\/$/, '');
+  const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY || '';
+  if (!supabaseUrl || !supabaseAnonKey) {
     return res.status(503).json({ success: false, error: 'Supabase server verification is not configured.' });
   }
 
   try {
-    const response = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+    const response = await fetch(`${supabaseUrl}/auth/v1/user`, {
       headers: {
-        apikey: SUPABASE_ANON_KEY,
+        apikey: supabaseAnonKey,
         Authorization: `Bearer ${match[1]}`,
       },
     });
