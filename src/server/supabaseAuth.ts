@@ -1,15 +1,14 @@
 import type { Request, Response, NextFunction } from 'express';
 
 export async function requireSupabaseUser(req: Request, res: Response, next: NextFunction) {
-  // Use native Node headers so this works in both Express and Vercel functions.
   const rawAuthorization = req.headers.authorization;
   const authorization = Array.isArray(rawAuthorization) ? rawAuthorization[0] || '' : rawAuthorization || '';
-  const match = authorization.match(/^Bearer\\s+(.+)$/i);
+  const match = authorization.match(/^Bearer\s+(.+)$/i);
   if (!match) {
     return res.status(401).json({ success: false, error: 'Sign in is required.' });
   }
 
-  const supabaseUrl = (process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || '').replace(/\\/$/, '');
+  const supabaseUrl = (process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || '').replace(/\/$/, '');
   const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY || '';
   if (!supabaseUrl || !supabaseAnonKey) {
     return res.status(503).json({ success: false, error: 'Supabase server verification is not configured.' });
