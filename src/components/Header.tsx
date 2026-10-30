@@ -50,11 +50,11 @@ export const Header: React.FC<HeaderProps> = ({
             onClick={() => onSelectMode('sparks')}
             className="flex items-center gap-2 group text-left"
           >
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-cyan-500 via-fuchsia-500 to-pink-500 p-[2px] shadow-[0_0_15px_rgba(6,182,212,0.3)] group-hover:scale-105 transition-transform">
-              <div className="w-full h-full bg-[#090a0f] rounded-[10px] flex items-center justify-center">
-                <Flame className="w-5 h-5 text-cyan-400 group-hover:text-pink-400 transition-colors" />
-              </div>
-            </div>
+            <img
+              src="/glitch-mark.svg"
+              alt="Glitch"
+              className="w-10 h-10 rounded-xl object-cover shadow-[0_0_18px_rgba(6,182,212,0.22)] group-hover:scale-105 transition-transform"
+            />
             <div>
               <div className="flex items-center gap-1.5">
                 <span className="font-extrabold text-base tracking-tight text-white group-hover:text-cyan-300 transition-colors font-['Plus_Jakarta_Sans']">
