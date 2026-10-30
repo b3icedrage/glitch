@@ -193,7 +193,7 @@ export const SparksView: React.FC<SparksViewProps> = ({
   const isAuthorFollowed = followedUserIds.has(activeReel.author.id);
 
   return (
-    <div className="relative w-full h-[calc(100vh-65px)] max-h-[920px] flex items-center justify-center p-0 md:p-4 select-none overflow-hidden">
+    <div className="relative w-full h-[calc(100dvh-124px-env(safe-area-inset-bottom))] md:h-[calc(100dvh-65px)] max-h-none md:max-h-[920px] flex items-center justify-center p-0 md:p-4 select-none overflow-hidden">
       
       {/* Toast Alert */}
       {toastMessage && (
@@ -204,7 +204,7 @@ export const SparksView: React.FC<SparksViewProps> = ({
 
       {/* Main Sparks Container (9:16 Aspect Ratio) */}
       <div
-        className="relative w-full max-w-[420px] h-full bg-black md:rounded-3xl overflow-hidden shadow-2xl border border-slate-800/60 flex items-center justify-center"
+        className="relative w-full max-w-[420px] h-full min-h-0 bg-black md:rounded-3xl overflow-hidden shadow-2xl border border-slate-800/60 flex items-center justify-center"
         onTouchStart={(event) => { touchStartY.current = event.changedTouches[0]?.clientY ?? null; }}
         onTouchEnd={(event) => {
           const startY = touchStartY.current;
