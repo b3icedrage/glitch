@@ -321,7 +321,7 @@ export default function App() {
       )}
 
       {/* Main Viewport Content */}
-      <main className="flex-1 flex flex-col pb-16 md:pb-0">
+      <main className="flex-1 min-w-0 w-full flex flex-col pb-[calc(4.5rem+env(safe-area-inset-bottom))] md:pb-0">
         
         {/* TikTok Vertical Video Sparks Feed */}
         {currentMode === 'sparks' && (
