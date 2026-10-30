@@ -184,7 +184,7 @@ export const Header: React.FC<HeaderProps> = ({
 
           <button
             onClick={() => { void auth.signOut(); }}
-            className="hidden lg:inline-flex rounded-lg border border-slate-700 px-2.5 py-1.5 text-[11px] font-semibold text-slate-300 hover:border-slate-500 hover:text-white"
+            className="inline-flex rounded-lg border border-slate-700 px-2 py-1.5 text-[10px] font-semibold text-slate-300 hover:border-slate-500 hover:text-white"
             title={auth.user?.email || 'Signed in'}
           >
             Sign out
