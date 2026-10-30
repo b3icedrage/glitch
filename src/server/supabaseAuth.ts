@@ -48,7 +48,7 @@ export async function requireSupabaseUser(req: Request, res: Response, next: Nex
   const rawAuthorization = req.headers.authorization;
   const authorization = Array.isArray(rawAuthorization) ? rawAuthorization[0] || '' : rawAuthorization || '';
   const match = authorization.match(/^Bearer\\s+(.+)$/i);
-  if (!match) {
+  if (!token) {
     return res.status(401).json({ success: false, error: 'Sign in is required.' });
   }
 
@@ -60,7 +60,7 @@ export async function requireSupabaseUser(req: Request, res: Response, next: Nex
 
   try {
     const response = await fetch(`${supabaseUrl}/auth/v1/user`, {
-      headers: { apikey: supabaseAnonKey, Authorization: `Bearer ${match[1]}` },
+      headers: { apikey: supabaseAnonKey, Authorization: `Bearer ${token}` },
     });
     if (!response.ok) {
       return res.status(401).json({ success: false, error: 'Your session is invalid or expired. Please sign in again.' });
