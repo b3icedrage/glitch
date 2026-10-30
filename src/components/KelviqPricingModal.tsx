@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useSupabaseAuth } from '../auth/supabaseAuth';
 import {
   X,
   Check,
@@ -24,6 +25,7 @@ export const KelviqPricingModal: React.FC<KelviqPricingModalProps> = ({
   onClose,
   isPro = false,
 }) => {
+  const auth = useSupabaseAuth();
   const [billingPeriod, setBillingPeriod] = useState<'MONTHLY' | 'YEARLY'>('MONTHLY');
   const [loading, setLoading] = useState<boolean>(false);
   const [portalLoading, setPortalLoading] = useState<boolean>(false);
@@ -45,7 +47,10 @@ export const KelviqPricingModal: React.FC<KelviqPricingModalProps> = ({
 
       const res = await fetch('/api/kelviq/checkout', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${auth.session?.access_token || ''}`,
+        },
         body: JSON.stringify({ chargePeriod: billingPeriod }),
       });
 
@@ -80,7 +85,10 @@ export const KelviqPricingModal: React.FC<KelviqPricingModalProps> = ({
 
       const res = await fetch('/api/kelviq/portal', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${auth.session?.access_token || ''}`,
+        },
       });
 
       const contentType = res.headers.get('content-type') || '';
