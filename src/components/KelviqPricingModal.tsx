@@ -227,7 +227,7 @@ export const KelviqPricingModal: React.FC<KelviqPricingModalProps> = ({
                   <Check className="w-3 h-3 text-emerald-400" />
                 </div>
                 <span>
-                  <strong className="text-white">Special Grade AI Combat:</strong> Unlock Sukuna / Gojo Special Grade difficulty & Domain Expansions.
+                  <strong className="text-white">Advanced AI Combat:</strong> Take on Special Grade challenges, boss encounters, and Domain Expansion battles.
                 </span>
               </div>
               <div className="flex items-center gap-2.5">
@@ -235,7 +235,7 @@ export const KelviqPricingModal: React.FC<KelviqPricingModalProps> = ({
                   <Check className="w-3 h-3 text-emerald-400" />
                 </div>
                 <span>
-                  <strong className="text-white">Unlimited Story Campaign:</strong> Unrestricted access to all battle stages and cursed dojo.
+                  <strong className="text-white">Full Story & Dojo Access:</strong> Play the story campaign, unlock battle stages, and train in the Cursed Dojo.
                 </span>
               </div>
               <div className="flex items-center gap-2.5">
@@ -243,7 +243,7 @@ export const KelviqPricingModal: React.FC<KelviqPricingModalProps> = ({
                   <Check className="w-3 h-3 text-emerald-400" />
                 </div>
                 <span>
-                  <strong className="text-white">500 AI Compute Credits/mo:</strong> Auto-resets monthly (METER feature) for AI simulation.
+                  <strong className="text-white">500 AI Compute Credits / month:</strong> A monthly allowance for AI-powered simulations and features.
                 </span>
               </div>
             </div>
