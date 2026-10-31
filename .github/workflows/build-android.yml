@@ -29,7 +29,6 @@ jobs:
         with:
           distribution: temurin
           java-version: '21'
-          cache: gradle
       - name: Install app dependencies
         run: npm install
       - name: Build web assets for Android
