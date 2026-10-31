@@ -529,7 +529,7 @@ export default function App() {
             posts={feedPosts}
             stories={stories}
             currentUser={currentUser}
-            creators={CREATORS}
+            creators={{ ...CREATORS, ...Object.fromEntries(feedPosts.map((post) => [post.author.id, post.author])) }}
             onSelectStory={(index) => {
               setSelectedStoryIndex(index);
               setIsStoryViewerOpen(true);
