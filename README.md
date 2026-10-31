@@ -24,8 +24,16 @@ Glitch brings fast, expressive creator experiences into a deep forest-green inte
 - Vite
 - Tailwind CSS 4
 - Lucide icons
-- Express + TypeScript server
-- Google GenAI SDK and Kelviq Node SDK for optional integrations
+- Cloudflare Pages for the React/Vite frontend
+- Convex for the application backend, database and real-time functions
+- Better Auth through the official Convex component
+- Cloudflare R2 for image and video storage
+- PostHog for product analytics
+- Legacy Express integrations retained temporarily for billing, Gemini and payment callbacks during migration
+
+## Infrastructure migration
+
+The target production stack and migration checklist are documented in [`CLOUD_STACK_MIGRATION.md`](./CLOUD_STACK_MIGRATION.md). The migration is in progress: do not remove the legacy Express integration or switch production traffic until its billing, AI and payment routes have been migrated and verified.
 
 ## Run locally
 
