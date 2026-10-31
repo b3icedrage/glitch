@@ -193,7 +193,7 @@ export const SparksView: React.FC<SparksViewProps> = ({
   const isAuthorFollowed = followedUserIds.has(activeReel.author.id);
 
   return (
-    <div className="relative w-full h-[calc(100vh-65px)] max-h-[920px] flex items-center justify-center p-0 md:p-4 select-none overflow-hidden">
+    <div className="sparks-viewport relative w-full flex items-center justify-center p-0 md:p-4 select-none overflow-hidden">
       
       {/* Toast Alert */}
       {toastMessage && (
