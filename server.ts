@@ -16,7 +16,7 @@ import {
   handleReportUsage,
   handleWebhook,
 } from './src/server/kelviq';
-import { requireSupabaseUser } from './src/server/supabaseAuth';
+import { requireFirebaseUser } from './src/server/firebaseAuth';
 
 dotenv.config();
 dotenv.config({ path: path.resolve(process.cwd(), '.env.local'), override: true });
@@ -41,10 +41,10 @@ app.post(
 app.use(express.json());
 
 // Kelviq Billing API Routes (Server-side only)
-app.post('/api/kelviq/checkout', requireSupabaseUser, handleCheckout);
-app.post('/api/kelviq/portal', requireSupabaseUser, handlePortal);
-app.get('/api/kelviq/entitlements', requireSupabaseUser, handleGetEntitlements);
-app.post('/api/kelviq/report-usage', requireSupabaseUser, handleReportUsage);
+app.post('/api/kelviq/checkout', requireFirebaseUser, handleCheckout);
+app.post('/api/kelviq/portal', requireFirebaseUser, handlePortal);
+app.get('/api/kelviq/entitlements', requireFirebaseUser, handleGetEntitlements);
+app.post('/api/kelviq/report-usage', requireFirebaseUser, handleReportUsage);
 
 // Initialize Google Gemini Client (User-Agent header required by aistudio-build)
 const ai = new GoogleGenAI({

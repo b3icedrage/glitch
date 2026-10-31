@@ -27,6 +27,25 @@ Glitch brings fast, expressive creator experiences into a deep forest-green inte
 - Express + TypeScript server
 - Google GenAI SDK and Kelviq Node SDK for optional integrations
 
+## Firebase Authentication setup
+
+Glitch uses Firebase Authentication for email/password accounts. The frontend calls Firebase's Identity Toolkit REST API and stores Firebase ID tokens with refresh tokens in browser local storage. Protected Kelviq routes validate ID tokens with Firebase before continuing.
+
+1. Create a Firebase project in [Firebase Console](https://console.firebase.google.com/).
+2. Open **Authentication → Sign-in method** and enable **Email/Password**.
+3. In **Project settings → General → Your apps**, register a Web app and copy its config values.
+4. Add these Vercel environment variables for **Production** and **Preview**, then redeploy:
+   - `VITE_FIREBASE_API_KEY`
+   - `VITE_FIREBASE_AUTH_DOMAIN`
+   - `VITE_FIREBASE_PROJECT_ID`
+   - `VITE_FIREBASE_APP_ID`
+   - `VITE_FIREBASE_MESSAGING_SENDER_ID` (optional)
+   - `VITE_FIREBASE_STORAGE_BUCKET` (optional)
+5. In **Authentication → Settings → Authorized domains**, add the Glitch production domain and any preview domain used for testing.
+6. The server reads `FIREBASE_API_KEY` to validate ID tokens for protected billing routes. Use a separate Google API key restricted to the Firebase Identity Toolkit API; never use a service-account private key in frontend configuration.
+
+Do not put Firebase service-account credentials or private keys in frontend variables or Git. Existing Supabase accounts are not copied automatically; users must create Firebase accounts unless a separate secure user migration is completed.
+
 ## Run locally
 
 Requirements: Node.js compatible with the versions in `package.json` and npm.
