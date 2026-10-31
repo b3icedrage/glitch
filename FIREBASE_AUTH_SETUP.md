@@ -19,11 +19,15 @@ In the Glitch Vercel project, open **Settings → Environment Variables**. Add t
 - `VITE_FIREBASE_MESSAGING_SENDER_ID` — optional
 - `VITE_FIREBASE_STORAGE_BUCKET` — optional
 
-For server-side billing token validation, also add `FIREBASE_API_KEY` with the same web API key. This is not a service-account key. Never add a service-account JSON or private key to any `VITE_*` variable.
+For server-side billing token validation, add `FIREBASE_API_KEY` as a separate Google API key restricted to the Firebase Identity Toolkit API. It is not a service-account key. Never add a service-account JSON or private key to any `VITE_*` variable.
 
 Redeploy after adding the variables. Vite embeds `VITE_*` values at build time.
 
-## 3. Test
+## 3. Password reset email handler
+
+In **Authentication → Templates → Password reset**, configure the custom action URL to `https://glitch-bice.vercel.app/` (or your current Glitch production domain) so the app receives Firebase's `mode` and `oobCode` query parameters and can display its password-reset form.
+
+## 4. Test
 
 1. Open the deployed Glitch website.
 2. Create an account with an email address and a password of at least 8 characters.
