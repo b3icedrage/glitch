@@ -25,7 +25,6 @@
     "@kelviq/node-sdk": "^2.9.0"
   },
   "devDependencies": {
-    "@kelviq/cli": "^0.4.2",
     "@types/node": "^22.14.0",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
@@ -34,6 +33,7 @@
     "tailwindcss": "^4.3.3",
     "tsx": "^4.21.0",
     "typescript": "^7.0.2",
-    "@types/express": "^4.17.21"
+    "@types/express": "^4.17.21",
+    "@kelviq/cli": "^0.4.2"
   }
 }
