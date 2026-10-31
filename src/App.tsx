@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSupabaseAuth } from './auth/supabaseAuth';
-import { getMyProfile } from './services/glitchCore';
+import { getMyProfile, updateMyProfile } from './services/glitchCore';
 import {
   PlatformMode,
   User,
@@ -157,6 +157,23 @@ export default function App() {
 
     return () => { active = false; };
   }, [auth.session?.user?.id, auth.session?.access_token]);
+
+  const handleUpdateCreatorProfile = async (updated: Partial<User>) => {
+    const session = auth.session;
+    if (!session?.user?.id) throw new Error('Sign in to update your creator profile.');
+    const profile = await updateMyProfile(session.user, session.access_token, {
+      display_name: updated.name,
+      handle: updated.handle?.replace(/^@/, '').toLowerCase(),
+      bio: updated.bio,
+    });
+    setCurrentUser((previous) => ({
+      ...previous,
+      name: profile.display_name,
+      handle: profile.handle,
+      bio: profile.bio,
+      avatar: profile.avatar_url || previous.avatar,
+    }));
+  };
 
   // Fetch live Kelviq entitlements & check URL params
   useEffect(() => {
@@ -445,7 +462,7 @@ export default function App() {
         {currentMode === 'profile' && (
           <ProfileView
             currentUser={currentUser}
-            onUpdateUser={(updated) => setCurrentUser((prev) => ({ ...prev, ...updated }))}
+            onUpdateUser={handleUpdateCreatorProfile}
             userPosts={feedPosts.filter((p) => p.author.id === currentUser.id || p.author.handle === currentUser.handle)}
             userSparks={sparks.filter((s) => s.author.id === currentUser.id || s.author.handle === currentUser.handle)}
             userVideos={cinemaVideos.filter((v) => v.channel.id === currentUser.id || v.channel.handle === currentUser.handle)}
