@@ -141,7 +141,7 @@ export default function App() {
       setTimeout(() => setBillingToast(null), 5000);
     }
 
-    fetch('https://glitch-bice.vercel.app/api/kelviq/entitlements', { headers: { Authorization: `Bearer ${auth.session.access_token}` } })
+    fetch('https://glitch-api-proxy.kipkiruibrian102198.workers.dev/api/kelviq/entitlements', { headers: { Authorization: `Bearer ${auth.session.access_token}` } })
       .then(async (res) => {
         const contentType = res.headers.get('content-type') || '';
         const body = await res.text();
@@ -278,7 +278,7 @@ export default function App() {
     }));
 
     // Report usage to Kelviq if active
-    fetch('https://glitch-bice.vercel.app/api/kelviq/report-usage', {
+    fetch('https://glitch-api-proxy.kipkiruibrian102198.workers.dev/api/kelviq/report-usage', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
