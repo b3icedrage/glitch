@@ -1,3 +1,7 @@
+
+// Resolve bundled image files through Vite so GitHub Pages subpath deployments work.
+const imageAssets = import.meta.glob('../assets/images/*', { eager: true, query: '?url', import: 'default' }) as Record<string, string>;
+const imageAsset = (filename: string): string => imageAssets[`../assets/images/${filename}`] ?? '';
 import { 
   User, 
   UserStory, 
@@ -16,7 +20,7 @@ export const CURRENT_USER: User = {
   id: 'user_me',
   name: 'Maya Lin',
   handle: 'mayacyber',
-  avatar: '/src/assets/images/glitch_creator_avatar_1793019134231.jpg',
+  avatar: imageAsset('glitch_creator_avatar_1793019134231.jpg'),
   verified: true,
   followersCount: 142800,
   followingCount: 384,
@@ -86,7 +90,7 @@ export const INITIAL_STORIES: UserStory[] = [
     items: [
       {
         id: 'story_me_1',
-        mediaUrl: '/src/assets/images/glitch_tech_desk_1793019176039.jpg',
+        mediaUrl: imageAsset('glitch_tech_desk_1793019176039.jpg'),
         type: 'image',
         durationSeconds: 6,
         timestamp: '15m ago',
@@ -116,7 +120,7 @@ export const INITIAL_STORIES: UserStory[] = [
     items: [
       {
         id: 'story_kai_1',
-        mediaUrl: '/src/assets/images/glitch_synthwave_thumb_1793019149342.jpg',
+        mediaUrl: imageAsset('glitch_synthwave_thumb_1793019149342.jpg'),
         type: 'image',
         durationSeconds: 6,
         timestamp: '1h ago',
@@ -131,7 +135,7 @@ export const INITIAL_STORIES: UserStory[] = [
       },
       {
         id: 'story_kai_2',
-        mediaUrl: '/src/assets/images/glitch_creator_avatar_1793019134231.jpg',
+        mediaUrl: imageAsset('glitch_creator_avatar_1793019134231.jpg'),
         type: 'image',
         durationSeconds: 5,
         timestamp: '45m ago',
@@ -152,7 +156,7 @@ export const INITIAL_STORIES: UserStory[] = [
     items: [
       {
         id: 'story_elena_1',
-        mediaUrl: '/src/assets/images/glitch_reel_dance_1793019162678.jpg',
+        mediaUrl: imageAsset('glitch_reel_dance_1793019162678.jpg'),
         type: 'image',
         durationSeconds: 6,
         timestamp: '2h ago',
@@ -177,7 +181,7 @@ export const INITIAL_STORIES: UserStory[] = [
     items: [
       {
         id: 'story_neon_1',
-        mediaUrl: '/src/assets/images/glitch_tech_desk_1793019176039.jpg',
+        mediaUrl: imageAsset('glitch_tech_desk_1793019176039.jpg'),
         type: 'image',
         durationSeconds: 5,
         timestamp: '4h ago',
@@ -199,8 +203,8 @@ export const INITIAL_FEED_POSTS: FeedPost[] = [
     id: 'post_1',
     author: CREATORS.kai,
     images: [
-      '/src/assets/images/glitch_synthwave_thumb_1793019149342.jpg',
-      '/src/assets/images/glitch_tech_desk_1793019176039.jpg'
+      imageAsset('glitch_synthwave_thumb_1793019149342.jpg'),
+      imageAsset('glitch_tech_desk_1793019176039.jpg')
     ],
     caption: 'Neon arteries of Shinjuku after midnight rain. Shot on custom anamorphic glass with 4K color grading. Would you live in this city?',
     location: 'Shinjuku, Tokyo',
@@ -236,7 +240,7 @@ export const INITIAL_FEED_POSTS: FeedPost[] = [
     id: 'post_2',
     author: CREATORS.elena,
     images: [
-      '/src/assets/images/glitch_reel_dance_1793019162678.jpg'
+      imageAsset('glitch_reel_dance_1793019162678.jpg')
     ],
     caption: 'Defying gravity on the underground circuit. We rehearsed this drop for 14 hours straight. Who wants the full tutorial breakdown on Glitch Cinema? ⚡👟',
     location: 'Berlin Mitte, Germany',
@@ -263,7 +267,7 @@ export const INITIAL_FEED_POSTS: FeedPost[] = [
     id: 'post_3',
     author: CREATORS.neon,
     images: [
-      '/src/assets/images/glitch_tech_desk_1793019176039.jpg'
+      imageAsset('glitch_tech_desk_1793019176039.jpg')
     ],
     caption: 'The ultimate 2026 content battlestation. Dual 32" OLEDs, magnetic levitation switchboard, and studio-grade condenser routing. Full 20-min documentary on our channel now!',
     location: 'San Francisco, CA',
@@ -293,7 +297,7 @@ export const INITIAL_SPARKS: SparkReel[] = [
     id: 'spark_1',
     author: CREATORS.elena,
     videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
-    posterUrl: '/src/assets/images/glitch_reel_dance_1793019162678.jpg',
+    posterUrl: imageAsset('glitch_reel_dance_1793019162678.jpg'),
     caption: 'Street dance energy at peak tempo! Try this footwork combo and tag me #GlitchSparks 👟🔥',
     tags: ['dancechallenge', 'shorts', 'fyp', 'viral'],
     soundTitle: 'Glitch Beats Vol. 4',
@@ -326,12 +330,12 @@ export const INITIAL_SPARKS: SparkReel[] = [
     id: 'spark_2',
     author: CREATORS.kai,
     videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
-    posterUrl: '/src/assets/images/glitch_synthwave_thumb_1793019149342.jpg',
+    posterUrl: imageAsset('glitch_synthwave_thumb_1793019149342.jpg'),
     caption: 'Tokyo expressway speedrun through midnight rain. Cinematic high-bitrate capture. 🌧️🏎️',
     tags: ['tokyo', 'speedrun', 'cybervibes', 'cinematography'],
     soundTitle: 'Midnight Expressway (Original Audio)',
     soundArtist: 'Kai Vexler',
-    soundCover: '/src/assets/images/glitch_synthwave_thumb_1793019149342.jpg',
+    soundCover: imageAsset('glitch_synthwave_thumb_1793019149342.jpg'),
     likesCount: 182300,
     isLiked: true,
     isSaved: true,
@@ -352,12 +356,12 @@ export const INITIAL_SPARKS: SparkReel[] = [
     id: 'spark_3',
     author: CREATORS.neon,
     videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WeAreGoingOnBullrun.mp4',
-    posterUrl: '/src/assets/images/glitch_tech_desk_1793019176039.jpg',
+    posterUrl: imageAsset('glitch_tech_desk_1793019176039.jpg'),
     caption: 'Listen to the sound of these lubricated magnetic hall switches. Pure ASMR satisfaction ⌨️🎧',
     tags: ['mechanicalkeyboards', 'asmr', 'desksetup', 'satisfying'],
     soundTitle: 'Keyboard Click ASMR 120WPM',
     soundArtist: 'Neo Labs Tech',
-    soundCover: '/src/assets/images/glitch_tech_desk_1793019176039.jpg',
+    soundCover: imageAsset('glitch_tech_desk_1793019176039.jpg'),
     likesCount: 93400,
     isLiked: false,
     isSaved: false,
@@ -382,7 +386,7 @@ export const INITIAL_CINEMA_VIDEOS: CinemaVideo[] = [
     title: 'Building the Ultimate Cyberpunk Workspace: Custom Silicon, OLEDs & Acoustic Tuning',
     description: `In this comprehensive build guide, we design, fabricate, and assemble an uncompromising creator environment from scratch.\n\nTimestamps:\n0:00 - The Vision & Philosophy\n2:15 - Desk Fabrication & Solid Walnut\n5:40 - Display Setup: Dual 32" QD-OLEDs\n10:12 - Custom Audio Rig & Analog Routing\n15:30 - Final Sound Demo & Cable Management\n\nThanks to our community supporters on Glitch! Subscribe for weekly engineering documentaries.`,
     videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
-    thumbnailUrl: '/src/assets/images/glitch_tech_desk_1793019176039.jpg',
+    thumbnailUrl: imageAsset('glitch_tech_desk_1793019176039.jpg'),
     duration: '18:42',
     viewsCount: '1.2M',
     uploadedAt: '3 days ago',
@@ -419,7 +423,7 @@ export const INITIAL_CINEMA_VIDEOS: CinemaVideo[] = [
     title: 'Tokyo 2099: Cyberpunk City Documentary in 4K 60FPS Anamorphic Cinema',
     description: `An immersive journey through the high-density districts of Shinjuku, Akihabara, and Shibuya after midnight rain. Shot on custom cinema anamorphic primes.\n\nAll music produced in-house on modular analog synthesizers.\n\nStream the full soundtrack on Glitch Audio.`,
     videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4',
-    thumbnailUrl: '/src/assets/images/glitch_synthwave_thumb_1793019149342.jpg',
+    thumbnailUrl: imageAsset('glitch_synthwave_thumb_1793019149342.jpg'),
     duration: '24:15',
     viewsCount: '3.8M',
     uploadedAt: '1 week ago',
@@ -447,7 +451,7 @@ export const INITIAL_CINEMA_VIDEOS: CinemaVideo[] = [
     title: 'World Championship Street Dance Routine: Behind The Scenes & Full Choreography',
     description: `Breakdown of our 1st place performance at the Global Street Session in Seoul. Includes multi-cam angles, slow-motion breakdowns, and dancer audio commentary.`,
     videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
-    thumbnailUrl: '/src/assets/images/glitch_reel_dance_1793019162678.jpg',
+    thumbnailUrl: imageAsset('glitch_reel_dance_1793019162678.jpg'),
     duration: '12:08',
     viewsCount: '890K',
     uploadedAt: '2 weeks ago',
@@ -474,7 +478,7 @@ export const INITIAL_CINEMA_VIDEOS: CinemaVideo[] = [
     title: 'Designing Reactive Digital Identities: UI/UX Masterclass for Modern Web Apps',
     description: `How to blend the visual punch of social media with production web architecture. Motion design, zero-pill typography, and buttery 60fps canvas performance.`,
     videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
-    thumbnailUrl: '/src/assets/images/glitch_creator_avatar_1793019134231.jpg',
+    thumbnailUrl: imageAsset('glitch_creator_avatar_1793019134231.jpg'),
     duration: '31:40',
     viewsCount: '540K',
     uploadedAt: '3 weeks ago',
@@ -521,7 +525,7 @@ export const INITIAL_CHATS: ChatThread[] = [
         sharedMedia: {
           id: 'spark_2',
           title: 'Tokyo expressway speedrun through midnight rain',
-          thumbnail: '/src/assets/images/glitch_synthwave_thumb_1793019149342.jpg',
+          thumbnail: imageAsset('glitch_synthwave_thumb_1793019149342.jpg'),
           mediaType: 'spark',
           authorHandle: 'kaivex'
         }
@@ -586,7 +590,7 @@ export const INITIAL_CHATS: ChatThread[] = [
         text: 'Sending you the prototype PCB layout for feedback.',
         timestamp: '3h ago',
         type: 'image',
-        mediaUrl: '/src/assets/images/glitch_tech_desk_1793019176039.jpg'
+        mediaUrl: imageAsset('glitch_tech_desk_1793019176039.jpg')
       }
     ]
   },
@@ -660,7 +664,7 @@ export const INITIAL_NOTIFICATIONS: GlitchNotification[] = [
     content: 'sent you 500 Super-Sparks on "Midnight City Drift"!',
     targetId: 'spark_1',
     targetType: 'spark',
-    targetThumbnail: '/src/assets/images/glitch_synthwave_thumb_1793019149342.jpg',
+    targetThumbnail: imageAsset('glitch_synthwave_thumb_1793019149342.jpg'),
     timestamp: '10m ago',
     read: false
   },
@@ -671,7 +675,7 @@ export const INITIAL_NOTIFICATIONS: GlitchNotification[] = [
     content: 'and 14 others liked your Spark reel',
     targetId: 'spark_1',
     targetType: 'spark',
-    targetThumbnail: '/src/assets/images/glitch_reel_dance_1793019162678.jpg',
+    targetThumbnail: imageAsset('glitch_reel_dance_1793019162678.jpg'),
     timestamp: '35m ago',
     read: false,
     groupedCount: 15
@@ -683,7 +687,7 @@ export const INITIAL_NOTIFICATIONS: GlitchNotification[] = [
     content: 'commented: "That mechanical switch actuation curve is pristine."',
     targetId: 'cinema_3',
     targetType: 'tube',
-    targetThumbnail: '/src/assets/images/glitch_tech_desk_1793019176039.jpg',
+    targetThumbnail: imageAsset('glitch_tech_desk_1793019176039.jpg'),
     timestamp: '2h ago',
     read: false
   },
@@ -720,7 +724,7 @@ export const INITIAL_LIVE_STREAMS: LiveStream[] = [
     title: 'LIVE: Coding a Cyberpunk Synth in Rust + Visuals (AMA)',
     category: 'Creative Tech',
     viewerCount: 8420,
-    thumbnailUrl: '/src/assets/images/glitch_tech_desk_1793019176039.jpg',
+    thumbnailUrl: imageAsset('glitch_tech_desk_1793019176039.jpg'),
     streamUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
     startedAt: '42m ago',
     tags: ['LiveCoding', 'Rust', 'CreativeTech', 'Synthwave'],
@@ -732,7 +736,7 @@ export const INITIAL_LIVE_STREAMS: LiveStream[] = [
     title: 'Glitch Battle Stage: Seoul Street Style Rehearsal',
     category: 'Music & Performance',
     viewerCount: 14190,
-    thumbnailUrl: '/src/assets/images/glitch_reel_dance_1793019162678.jpg',
+    thumbnailUrl: imageAsset('glitch_reel_dance_1793019162678.jpg'),
     streamUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
     startedAt: '1h 10m ago',
     tags: ['Freestyle', 'Hyperpop', 'DanceBattle']
@@ -743,7 +747,7 @@ export const INITIAL_LIVE_STREAMS: LiveStream[] = [
     title: 'Assembling a $5,000 Custom Optical Keyboard with Hall Sensors',
     category: 'Hardware & Modding',
     viewerCount: 5210,
-    thumbnailUrl: '/src/assets/images/glitch_tech_desk_1793019176039.jpg',
+    thumbnailUrl: imageAsset('glitch_tech_desk_1793019176039.jpg'),
     streamUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
     startedAt: '25m ago',
     tags: ['MechanicalKeyboards', 'CustomBuild', 'Tech']
@@ -785,7 +789,7 @@ export const INITIAL_SOUNDS: GlitchSound[] = [
     id: 'sound_1',
     title: 'Kavinsky - Nightcall (Glitch Remix)',
     artist: 'Glitch Sound Lab',
-    coverUrl: '/src/assets/images/glitch_synthwave_thumb_1793019149342.jpg',
+    coverUrl: imageAsset('glitch_synthwave_thumb_1793019149342.jpg'),
     duration: '0:34',
     usageCount: '142.8K',
     category: 'Synthwave'
@@ -794,7 +798,7 @@ export const INITIAL_SOUNDS: GlitchSound[] = [
     id: 'sound_2',
     title: 'Hyperdrive Bassline',
     artist: 'Elena Rostova',
-    coverUrl: '/src/assets/images/glitch_reel_dance_1793019162678.jpg',
+    coverUrl: imageAsset('glitch_reel_dance_1793019162678.jpg'),
     duration: '0:22',
     usageCount: '98.4K',
     category: 'Hyperpop'
@@ -803,7 +807,7 @@ export const INITIAL_SOUNDS: GlitchSound[] = [
     id: 'sound_3',
     title: 'Midnight Expressway',
     artist: 'Kai Vexler',
-    coverUrl: '/src/assets/images/glitch_creator_avatar_1793019134231.jpg',
+    coverUrl: imageAsset('glitch_creator_avatar_1793019134231.jpg'),
     duration: '0:45',
     usageCount: '215.1K',
     category: 'Cyberpunk'
@@ -812,7 +816,7 @@ export const INITIAL_SOUNDS: GlitchSound[] = [
     id: 'sound_4',
     title: 'Keyboard ASMR 120WPM',
     artist: 'Neo Labs Tech',
-    coverUrl: '/src/assets/images/glitch_tech_desk_1793019176039.jpg',
+    coverUrl: imageAsset('glitch_tech_desk_1793019176039.jpg'),
     duration: '0:30',
     usageCount: '44.3K',
     category: 'Ambience'
