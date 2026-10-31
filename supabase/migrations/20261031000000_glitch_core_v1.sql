@@ -11,7 +11,6 @@ create table if not exists public.profiles (
   avatar_url text,
   bio text not null default '',
   website_url text,
-  is_private boolean not null default false,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   constraint profiles_handle_format check (handle ~ '^[a-z0-9_]{3,30}$'),
