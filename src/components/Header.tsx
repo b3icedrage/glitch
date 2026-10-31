@@ -51,7 +51,7 @@ export const Header: React.FC<HeaderProps> = ({
             className="flex items-center gap-2 group text-left"
           >
             <img
-              src="/glitch-mark.svg"
+              src="./glitch-mark.svg"
               alt="Glitch"
               className="w-10 h-10 rounded-xl object-cover shadow-[0_0_18px_rgba(6,182,212,0.22)] group-hover:scale-105 transition-transform"
             />
