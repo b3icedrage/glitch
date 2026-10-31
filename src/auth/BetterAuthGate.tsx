@@ -1,11 +1,11 @@
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useState, type ReactNode } from "react";
 import { authClient } from "../lib/auth-client";
 import {
   identifyAnalyticsUser,
   resetAnalyticsUser,
 } from "../lib/analytics";
 
-export function BetterAuthGate({ children }: { children: React.ReactNode }) {
+export function BetterAuthGate({ children }: { children: ReactNode }) {
   const { data: session, isPending } = authClient.useSession();
   const [mode, setMode] = useState<"signin" | "signup" | "reset" | "new-password">(
     new URLSearchParams(window.location.search).has("token") ? "new-password" : "signin",
