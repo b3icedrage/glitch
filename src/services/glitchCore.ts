@@ -24,6 +24,10 @@ export interface CorePost {
   created_at: string;
   updated_at: string;
   profiles?: CreatorProfile;
+  post_likes?: Array<{ user_id: string }>;
+  post_saves?: Array<{ user_id: string }>;
+  comments?: Array<{ id: string }>;
+  media_url?: string;
   post_media?: Array<{
     id: string;
     storage_path: string;
@@ -110,12 +114,23 @@ export async function updateMyProfile(
   return rows[0];
 }
 
-export async function getPublicFeed(accessToken: string, limit = 30): Promise<CorePost[]> {
+export async function getPublicFeed(accessToken: string, viewerId?: string, limit = 30): Promise<CorePost[]> {
   const safeLimit = Math.max(1, Math.min(Math.floor(limit), 100));
-  return request<CorePost[]>(
-    `posts?select=id,author_id,caption,location,visibility,comments_enabled,created_at,updated_at,profiles(id,handle,display_name,avatar_url),post_media(id,storage_path,media_type,alt_text,position)&visibility=eq.public&order=created_at.desc&limit=${safeLimit}`,
+  const rows = await request<CorePost[]>(
+    `posts?select=id,author_id,caption,location,visibility,comments_enabled,created_at,updated_at,profiles(id,handle,display_name,avatar_url),post_media(id,storage_path,media_type,alt_text,position),post_likes(user_id),post_saves(user_id),comments(id)&visibility=eq.public&order=created_at.desc&limit=${safeLimit}`,
     accessToken
   );
+  return Promise.all(rows.map(async (post) => {
+    const firstMedia = (post.post_media || []).slice().sort((a, b) => a.position - b.position)[0];
+    if (!firstMedia) return post;
+    try {
+      const signed = await getSignedMediaUrl(firstMedia.storage_path, accessToken);
+      return { ...post, media_url: signed };
+    } catch (error) {
+      console.warn('Could not resolve post media:', error);
+      return post;
+    }
+  }));
 }
 
 export async function createPost(
@@ -217,4 +232,84 @@ export async function savePost(postId: string, userId: string, saved: boolean, a
       { method: 'DELETE', prefer: 'return=minimal' }
     );
   }
+}
+
+
+export async function getMyFollowIds(userId: string, accessToken: string): Promise<string[]> {
+  const rows = await request<Array<{ following_id: string }>>(
+    `follows?select=following_id&follower_id=eq.${encodeURIComponent(userId)}`,
+    accessToken
+  );
+  return rows.map((row) => row.following_id);
+}
+
+export async function getSignedMediaUrl(storagePath: string, accessToken: string): Promise<string> {
+  requireConfig();
+  const response = await fetch(`${SUPABASE_URL}/storage/v1/object/sign/post-media/${storagePath.split('/').map(encodeURIComponent).join('/')}`, {
+    method: 'POST',
+    headers: {
+      apikey: SUPABASE_ANON_KEY,
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ expiresIn: 3600 }),
+  });
+  const raw = await response.text();
+  if (!response.ok) throw new GlitchDataError(raw || 'Could not create a signed media URL.', response.status);
+  const data = JSON.parse(raw) as { signedURL?: string };
+  if (!data.signedURL) throw new GlitchDataError('Storage did not return a signed media URL.');
+  return data.signedURL.startsWith('http') ? data.signedURL : `${SUPABASE_URL}${data.signedURL.startsWith('/') ? '' : '/'}${data.signedURL}`;
+}
+
+export async function uploadPostMedia(
+  postId: string,
+  ownerId: string,
+  file: File,
+  accessToken: string
+): Promise<string> {
+  requireConfig();
+  const isImage = file.type.startsWith('image/');
+  const isVideo = file.type.startsWith('video/');
+  const maxBytes = isVideo ? 100 * 1024 * 1024 : 15 * 1024 * 1024;
+  if ((!isImage && !isVideo) || file.size > maxBytes) {
+    throw new GlitchDataError(isVideo ? 'Videos must be 100 MB or smaller.' : 'Choose an image up to 15 MB or a video up to 100 MB.');
+  }
+  const safeName = file.name.toLowerCase().replace(/[^a-z0-9._-]+/g, '-').slice(-100) || 'upload';
+  const storagePath = `${ownerId}/${postId}/${crypto.randomUUID()}-${safeName}`;
+  const upload = await fetch(`${SUPABASE_URL}/storage/v1/object/post-media/${storagePath.split('/').map(encodeURIComponent).join('/')}`, {
+    method: 'POST',
+    headers: {
+      apikey: SUPABASE_ANON_KEY,
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': file.type,
+      'x-upsert': 'false',
+    },
+    body: file,
+  });
+  if (!upload.ok) throw new GlitchDataError(await upload.text() || 'Media upload failed.', upload.status);
+  const rows = await request<Array<{ id: string }>>(
+    'post_media?select=id',
+    accessToken,
+    {
+      method: 'POST',
+      body: {
+        post_id: postId,
+        owner_id: ownerId,
+        storage_path: storagePath,
+        media_type: isVideo ? 'video' : 'image',
+        alt_text: file.name.slice(0, 500),
+        position: 0,
+      },
+      prefer: 'return=representation',
+    }
+  );
+  if (!rows[0]) throw new GlitchDataError('Media uploaded but its post record was not created.');
+  return getSignedMediaUrl(storagePath, accessToken);
+}
+
+export async function deletePost(postId: string, accessToken: string): Promise<void> {
+  await request(`posts?id=eq.${encodeURIComponent(postId)}`, accessToken, {
+    method: 'DELETE',
+    prefer: 'return=minimal',
+  });
 }
