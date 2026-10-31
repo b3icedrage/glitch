@@ -17,6 +17,7 @@ const firebaseBuildConfig = {
 
 export default defineConfig(() => {
   return {
+    base: process.env.GITHUB_PAGES === 'true' ? '/glitch/' : '/',
     plugins: [react(), tailwindcss()],
     define: Object.fromEntries(
       Object.entries(firebaseBuildConfig).map(([key, value]) => [`import.meta.env.${key}`, JSON.stringify(value)]),
