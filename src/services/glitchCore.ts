@@ -28,6 +28,7 @@ export interface CorePost {
   post_saves?: Array<{ user_id: string }>;
   comments?: Array<{ id: string }>;
   media_url?: string;
+  media_urls?: string[];
   post_media?: Array<{
     id: string;
     storage_path: string;
@@ -116,16 +117,19 @@ export async function updateMyProfile(
 
 export async function getPublicFeed(accessToken: string, viewerId?: string, limit = 30): Promise<CorePost[]> {
   const safeLimit = Math.max(1, Math.min(Math.floor(limit), 100));
+  const audienceFilter = viewerId
+    ? `&or=(visibility.neq.private,author_id.eq.${encodeURIComponent(viewerId)})`
+    : '&visibility=eq.public';
   const rows = await request<CorePost[]>(
-    `posts?select=id,author_id,caption,location,visibility,comments_enabled,created_at,updated_at,profiles(id,handle,display_name,avatar_url),post_media(id,storage_path,media_type,alt_text,position),post_likes(user_id),post_saves(user_id),comments(id)&visibility=eq.public&order=created_at.desc&limit=${safeLimit}`,
+    `posts?select=id,author_id,caption,location,visibility,comments_enabled,created_at,updated_at,profiles(id,handle,display_name,avatar_url),post_media(id,storage_path,media_type,alt_text,position),post_likes(user_id),post_saves(user_id),comments(id)${audienceFilter}&order=created_at.desc&limit=${safeLimit}`,
     accessToken
   );
   return Promise.all(rows.map(async (post) => {
-    const firstMedia = (post.post_media || []).slice().sort((a, b) => a.position - b.position)[0];
-    if (!firstMedia) return post;
+    const media = (post.post_media || []).slice().sort((a, b) => a.position - b.position);
+    if (media.length === 0) return post;
     try {
-      const signed = await getSignedMediaUrl(firstMedia.storage_path, accessToken);
-      return { ...post, media_url: signed };
+      const mediaUrls = await Promise.all(media.map((item) => getSignedMediaUrl(item.storage_path, accessToken)));
+      return { ...post, media_url: mediaUrls[0], media_urls: mediaUrls };
     } catch (error) {
       console.warn('Could not resolve post media:', error);
       return post;
