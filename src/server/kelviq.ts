@@ -133,8 +133,13 @@ export async function handleCheckout(req: Request, res: Response) {
     await ensureCustomerExists(customerId, email, name);
 
     // Determine absolute successUrl
-    const host = req.get('host') || 'localhost:3000';
-    const protocol = req.protocol === 'https' || req.get('x-forwarded-proto') === 'https' ? 'https' : 'http';
+    // Vercel supplies Node IncomingMessage requests, not Express Request objects.
+    // Read forwarded headers directly and tolerate proxy header arrays.
+    const hostHeader = req.headers.host;
+    const host = (Array.isArray(hostHeader) ? hostHeader[0] : hostHeader) || 'localhost:3000';
+    const forwardedProto = req.headers['x-forwarded-proto'];
+    const forwardedProtoValue = Array.isArray(forwardedProto) ? forwardedProto[0] : forwardedProto;
+    const protocol = forwardedProtoValue === 'https' ? 'https' : 'http';
     const appUrl = process.env.APP_URL || `${protocol}://${host}`;
     const successUrl = `${appUrl}/?billing=success`;
 
