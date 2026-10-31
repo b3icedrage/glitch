@@ -18,10 +18,13 @@ function addVercelCompatibility(req: CompatibleRequest, res: CompatibleResponse)
     };
   }
   if (typeof req.get !== 'function') {
-    req.get = (name: string) => {
-      const value = req.headers[name.toLowerCase()];
-      return Array.isArray(value) ? value.join(', ') : value;
-    };
+    Object.defineProperty(req, 'get', {
+      configurable: true,
+      value: (name: string) => {
+        const value = req.headers[name.toLowerCase()];
+        return Array.isArray(value) ? value.join(', ') : value;
+      },
+    });
   }
   if (!req.protocol) {
     Object.defineProperty(req, 'protocol', { configurable: true, get: () => {
