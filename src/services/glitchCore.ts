@@ -291,24 +291,32 @@ export async function uploadPostMedia(
     body: file,
   });
   if (!upload.ok) throw new GlitchDataError(await upload.text() || 'Media upload failed.', upload.status);
-  const rows = await request<Array<{ id: string }>>(
-    'post_media?select=id',
-    accessToken,
-    {
-      method: 'POST',
-      body: {
-        post_id: postId,
-        owner_id: ownerId,
-        storage_path: storagePath,
-        media_type: isVideo ? 'video' : 'image',
-        alt_text: file.name.slice(0, 500),
-        position: 0,
-      },
-      prefer: 'return=representation',
-    }
-  );
-  if (!rows[0]) throw new GlitchDataError('Media uploaded but its post record was not created.');
-  return getSignedMediaUrl(storagePath, accessToken);
+  try {
+    const rows = await request<Array<{ id: string }>>(
+      'post_media?select=id',
+      accessToken,
+      {
+        method: 'POST',
+        body: {
+          post_id: postId,
+          owner_id: ownerId,
+          storage_path: storagePath,
+          media_type: isVideo ? 'video' : 'image',
+          alt_text: file.name.slice(0, 500),
+          position: 0,
+        },
+        prefer: 'return=representation',
+      }
+    );
+    if (!rows[0]) throw new GlitchDataError('Media uploaded but its post record was not created.');
+    return await getSignedMediaUrl(storagePath, accessToken);
+  } catch (error) {
+    await fetch(`${SUPABASE_URL}/storage/v1/object/post-media/${storagePath.split('/').map(encodeURIComponent).join('/')}`, {
+      method: 'DELETE',
+      headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${accessToken}` },
+    }).catch(() => undefined);
+    throw error;
+  }
 }
 
 export async function deletePost(postId: string, accessToken: string): Promise<void> {
