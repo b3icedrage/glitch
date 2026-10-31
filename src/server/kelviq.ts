@@ -42,27 +42,26 @@ const processedWebhookEventIds = new Set<string>();
  * Never read from request body or query params.
  */
 export function getOrCreateServerCustomerId(req: Request): { customerId: string; email: string; name: string } {
-  const user = (req as any).supabaseUser as {
-    id?: string;
+  // Firebase middleware verifies the ID token and attaches this account.
+  const user = (req as any).firebaseUser as {
+    localId?: string;
     email?: string;
-    user_metadata?: Record<string, unknown>;
+    displayName?: string;
   } | undefined;
 
-  if (!user?.id || !user.email) {
-    throw new Error('A verified Supabase user with an email address is required.');
+  if (!user?.localId || !user.email) {
+    throw new Error('A verified Firebase user with an email address is required.');
   }
 
-  // Stable provider-independent mapping: the same Supabase user always resolves
-  // to the same Kelviq customer identifier. Never trust client-supplied IDs.
-  const customerId = `glitch_${user.id}`;
-  const metadataName = user.user_metadata?.full_name || user.user_metadata?.name || user.user_metadata?.display_name;
+  // Derive the Kelviq customer ID only from the verified Firebase UID.
+  const customerId = `glitch_${user.localId}`;
+  const metadataName = user.displayName;
   const name = typeof metadataName === 'string' && metadataName.trim()
     ? metadataName.trim().slice(0, 120)
     : user.email.split('@')[0];
 
   return { customerId, email: user.email, name };
 }
-
 /**
  * Helper to ensure the customer exists in Kelviq with an email address
  * before creating checkout or portal sessions.
