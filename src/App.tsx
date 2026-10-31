@@ -86,7 +86,7 @@ function writeStoredState(key: string, value: unknown) {
 }
 
 export default function App() {
-  const auth = useSupabaseAuth();
+  const auth = useFirebaseAuth();
   // Navigation State (defaults to TikTok 'sparks' video feed)
   const [currentMode, setCurrentMode] = useState<PlatformMode>('sparks');
   const [previousMode, setPreviousMode] = useState<PlatformMode>('sparks');
