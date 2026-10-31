@@ -22,9 +22,7 @@
     "express": "^4.21.2",
     "dotenv": "^17.2.3",
     "motion": "^12.23.24",
-    "@kelviq/node-sdk": "^2.9.0",
-    "firebase": "^12.5.0",
-    "firebase-admin": "^13.5.0"
+    "@kelviq/node-sdk": "^2.9.0"
   },
   "devDependencies": {
     "@kelviq/cli": "^0.4.2",
