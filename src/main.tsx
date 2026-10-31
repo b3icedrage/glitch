@@ -5,9 +5,9 @@ import { FirebaseAuthProvider } from './auth/firebaseAuth';
 import { AuthGate } from './auth/AuthGate';
 
 createRoot(document.getElementById('root')!).render(
-  <SupabaseAuthProvider>
+  <FirebaseAuthProvider>
     <AuthGate>
       <App />
     </AuthGate>
-  </SupabaseAuthProvider>
+  </FirebaseAuthProvider>
 );
