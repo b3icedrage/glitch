@@ -19,7 +19,7 @@ This branch introduces the initial infrastructure foundation. It does not yet cu
 - [x] Add PostHog analytics helpers with autocapture disabled.
 - [x] Add Cloudflare Pages build configuration and SPA fallback.
 - [ ] Generate Convex files and validate the Better Auth component against a real dev deployment.
-- [ ] Wire the React root and existing sign-in UI to Convex + Better Auth.
+- [x] Wire the React root and a new Better Auth sign-in/registration UI to Convex + Better Auth.
 - [ ] Migrate application data access from mock/local state to Convex queries and mutations.
 - [ ] Move Gemini, billing, payment callbacks and any remaining Express endpoints to suitable managed endpoints before disabling Express.
 - [ ] Configure R2 CORS, custom media domain, lifecycle rules and private-media access.
