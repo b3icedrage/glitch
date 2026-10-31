@@ -340,3 +340,60 @@ grant insert, delete on public.follows, public.post_likes, public.post_saves to 
 grant select, insert, update, delete on public.post_saves to authenticated;
 grant insert, update, delete on public.comments to authenticated;
 
+
+
+-- Private media storage. Signed URLs are issued only after the caller can read the
+-- matching post_media row, which itself inherits the parent post's visibility.
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values (
+  'post-media',
+  'post-media',
+  false,
+  104857600,
+  array['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'video/mp4', 'video/webm', 'video/quicktime']
+)
+on conflict (id) do update
+set public = false,
+    file_size_limit = excluded.file_size_limit,
+    allowed_mime_types = excluded.allowed_mime_types;
+
+drop policy if exists "Post media is readable with visible post" on storage.objects;
+create policy "Post media is readable with visible post" on storage.objects
+for select to authenticated
+using (
+  bucket_id = 'post-media'
+  and exists (
+    select 1
+    from public.post_media m
+    join public.posts p on p.id = m.post_id
+    where m.storage_path = storage.objects.name
+  )
+);
+
+drop policy if exists "Users upload media into their own folder" on storage.objects;
+create policy "Users upload media into their own folder" on storage.objects
+for insert to authenticated
+with check (
+  bucket_id = 'post-media'
+  and (storage.foldername(name))[1] = (select auth.uid())::text
+);
+
+drop policy if exists "Users update media in their own folder" on storage.objects;
+create policy "Users update media in their own folder" on storage.objects
+for update to authenticated
+using (
+  bucket_id = 'post-media'
+  and (storage.foldername(name))[1] = (select auth.uid())::text
+)
+with check (
+  bucket_id = 'post-media'
+  and (storage.foldername(name))[1] = (select auth.uid())::text
+);
+
+drop policy if exists "Users delete media in their own folder" on storage.objects;
+create policy "Users delete media in their own folder" on storage.objects
+for delete to authenticated
+using (
+  bucket_id = 'post-media'
+  and (storage.foldername(name))[1] = (select auth.uid())::text
+);
