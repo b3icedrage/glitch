@@ -66,7 +66,7 @@ function mapCorePost(post: CorePost, viewer: User): FeedPost {
   return {
     id: post.id,
     author,
-    images: post.media_url ? [post.media_url] : [author.avatar],
+    images: post.media_urls?.length ? post.media_urls : post.media_url ? [post.media_url] : [author.avatar],
     caption,
     location: post.location || undefined,
     likesCount: post.post_likes?.length || 0,
