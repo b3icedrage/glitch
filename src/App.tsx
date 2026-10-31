@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSupabaseAuth } from './auth/supabaseAuth';
+import { getMyProfile } from './services/glitchCore';
 import {
   PlatformMode,
   User,
@@ -131,6 +132,31 @@ export default function App() {
   useEffect(() => writeStoredState('glitch.notifications', notifications), [notifications]);
   useEffect(() => writeStoredState('glitch.followedUserIds', Array.from(followedUserIds)), [followedUserIds]);
   useEffect(() => writeStoredState('glitch.subscribedChannelIds', Array.from(subscribedChannelIds)), [subscribedChannelIds]);
+
+  // Load the signed-in account's real creator profile from Supabase.
+  useEffect(() => {
+    let active = true;
+    const session = auth.session;
+    if (!session?.user?.id) return () => { active = false; };
+
+    getMyProfile(session.user, session.access_token)
+      .then((profile) => {
+        if (!active || !profile) return;
+        setCurrentUser((previous) => ({
+          ...previous,
+          id: profile.id,
+          name: profile.display_name,
+          handle: profile.handle,
+          avatar: profile.avatar_url || previous.avatar,
+          bio: profile.bio,
+        }));
+      })
+      .catch((error) => {
+        console.warn('Could not load the signed-in creator profile:', error);
+      });
+
+    return () => { active = false; };
+  }, [auth.session?.user?.id, auth.session?.access_token]);
 
   // Fetch live Kelviq entitlements & check URL params
   useEffect(() => {
