@@ -25,7 +25,7 @@ export const KelviqPricingModal: React.FC<KelviqPricingModalProps> = ({
   onClose,
   isPro = false,
 }) => {
-  const auth = useSupabaseAuth();
+  const auth = useFirebaseAuth();
   const [billingPeriod, setBillingPeriod] = useState<'MONTHLY' | 'YEARLY'>('MONTHLY');
   const [loading, setLoading] = useState<boolean>(false);
   const [portalLoading, setPortalLoading] = useState<boolean>(false);
