@@ -133,7 +133,7 @@ export const LiveStreamView: React.FC<LiveStreamViewProps> = ({
   };
 
   return (
-    <div className="w-full min-h-[calc(100vh-65px)] bg-[#07080c] flex flex-col select-none relative">
+    <div className="live-viewport w-full bg-[#07080c] flex flex-col select-none relative">
       {/* Toast */}
       {toastMessage && (
         <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-slate-900/95 border border-cyan-500/50 text-cyan-300 text-xs px-4 py-2 rounded-full shadow-2xl backdrop-blur-md animate-in fade-in slide-in-from-top-2">
