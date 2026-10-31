@@ -39,7 +39,7 @@ export const Header: React.FC<HeaderProps> = ({
   unreadNotificationsCount = 3,
   unreadMessagesCount = 2,
 }) => {
-  const auth = useSupabaseAuth();
+  const auth = useFirebaseAuth();
   return (
     <header className="sticky top-0 z-40 bg-[#07080d]/95 backdrop-blur-md border-b border-slate-800/80 px-4 md:px-6 py-2.5 transition-all">
       <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
