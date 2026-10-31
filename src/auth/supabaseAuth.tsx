@@ -20,10 +20,13 @@ interface AuthContextValue {
   session: SupabaseSession | null;
   loading: boolean;
   configured: boolean;
+  isPasswordRecovery: boolean;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string) => Promise<boolean>;
   signOut: () => Promise<void>;
   sendPasswordReset: (email: string) => Promise<void>;
+  updatePassword: (password: string) => Promise<void>;
+  clearPasswordRecovery: () => void;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -78,6 +81,7 @@ function withExpiry(session: SupabaseSession): SupabaseSession {
 export function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<SupabaseSession | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isPasswordRecovery, setIsPasswordRecovery] = useState(false);
 
   const applySession = useCallback((next: SupabaseSession | null) => {
     const normalized = next ? withExpiry(next) : null;
@@ -99,12 +103,49 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
         if (active) setLoading(false);
         return;
       }
-      const stored = readSession();
-      if (!stored) {
-        if (active) setLoading(false);
-        return;
-      }
+
       try {
+        // Supabase recovery links may return an implicit-flow session in the URL hash.
+        const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+        const queryParams = new URLSearchParams(window.location.search);
+        const recoveryType = hashParams.get('type') || queryParams.get('type');
+
+        if (recoveryType === 'recovery') {
+          let recoverySession: SupabaseSession | null = null;
+          const accessToken = hashParams.get('access_token');
+          const refreshToken = hashParams.get('refresh_token');
+
+          if (accessToken && refreshToken) {
+            const user = await authRequest<SupabaseUser>('user', undefined, accessToken);
+            recoverySession = {
+              access_token: accessToken,
+              refresh_token: refreshToken,
+              expires_in: Number(hashParams.get('expires_in') || 3600),
+              token_type: hashParams.get('token_type') || 'bearer',
+              user,
+            };
+          } else {
+            // Also support email templates that redirect with a token_hash.
+            const tokenHash = queryParams.get('token_hash') || hashParams.get('token_hash');
+            if (tokenHash) {
+              recoverySession = await authRequest<SupabaseSession>('verify?type=recovery', {
+                token_hash: tokenHash,
+              });
+            }
+          }
+
+          if (recoverySession) {
+            if (active) {
+              applySession(recoverySession);
+              setIsPasswordRecovery(true);
+              window.history.replaceState({}, document.title, window.location.pathname);
+            }
+            return;
+          }
+        }
+
+        const stored = readSession();
+        if (!stored) return;
         let current = stored;
         if (!current.expires_at || current.expires_at * 1000 < Date.now() + 60000) {
           const refreshed = await authRequest<SupabaseSession>('token?grant_type=refresh_token', {
@@ -162,6 +203,7 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
       }
     } finally {
       applySession(null);
+      setIsPasswordRecovery(false);
     }
   }, [session, applySession]);
 
@@ -169,16 +211,41 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
     await authRequest(`recover?redirect_to=${encodeURIComponent(window.location.origin)}`, { email });
   }, []);
 
+  const updatePassword = useCallback(async (password: string) => {
+    if (!session?.access_token) throw new Error('Your password-reset session has expired. Request a new reset link.');
+    const response = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+      method: 'PUT',
+      headers: {
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${session.access_token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ password }),
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      throw new Error(data.msg || data.message || data.error_description || data.error || 'Could not update your password.');
+    }
+  }, [session]);
+
+  const clearPasswordRecovery = useCallback(() => {
+    setIsPasswordRecovery(false);
+    window.history.replaceState({}, document.title, window.location.pathname);
+  }, []);
+
   const value = useMemo<AuthContextValue>(() => ({
     user: session?.user || null,
     session,
     loading,
     configured,
+    isPasswordRecovery,
     signIn,
     signUp,
     signOut,
     sendPasswordReset,
-  }), [session, loading, signIn, signUp, signOut, sendPasswordReset]);
+    updatePassword,
+    clearPasswordRecovery,
+  }), [session, loading, isPasswordRecovery, signIn, signUp, signOut, sendPasswordReset, updatePassword, clearPasswordRecovery]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
