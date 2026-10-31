@@ -9,6 +9,7 @@ This migration establishes the first persistent, multi-user social graph for Gli
 - Follow and unfollow relationships.
 - Posts with public, followers-only, and private visibility.
 - Ordered image/video media metadata per post.
+- A private `post-media` Storage bucket with per-user upload folders and visibility-aware signed media access.
 - Likes, threaded comments, and private saved-post collections.
 - Row Level Security (RLS) policies for every table and indexes for common feed/profile lookups.
 
@@ -26,7 +27,7 @@ The migration is safe to re-run for its declared tables, indexes, triggers, and 
 
 ## Storage is a separate setup step
 
-The `post_media.storage_path` field stores an object path, not an uploaded file. Before enabling real uploads, create a private Supabase Storage bucket named `post-media` and add Storage policies that restrict upload, update, and delete to the authenticated user's own folder (first path segment = `auth.uid()`). Serve private media with short-lived signed URLs. Do not make this bucket public or store temporary browser blob URLs in the database.
+The migration creates a private Supabase Storage bucket named `post-media` and adds policies that restrict uploads, updates, and deletes to the authenticated user's own folder (first path segment = `auth.uid()`). Reads are allowed only when the corresponding `post_media` row belongs to a post visible to the signed-in user. The frontend uploads media to that bucket and requests one-hour signed URLs. Do not make this bucket public or store temporary browser blob URLs in the database.
 
 ## Current boundaries
 
@@ -39,7 +40,7 @@ The `post_media.storage_path` field stores an object path, not an uploaded file.
 ## Next implementation sequence
 
 1. Add a typed Supabase data client using the existing public URL and anon/publishable key.
-2. Replace demo-only profile/feed/follow/like/comment/save reads and writes with authenticated database calls.
-3. Add private Storage upload flow and signed media URLs.
-4. Add integration tests for two-user visibility and ownership.
+2. The profile, public feed, follow/unfollow, like, comment, save, post publishing, private media upload, and signed URL flows are now wired to the authenticated data service on the feature branch.
+3. Apply the migration to a staging Supabase project and verify the storage policies before enabling uploads.
+4. Add integration tests for two-user visibility and ownership, including attempts to read private posts and another user's storage folder.
 5. Add realtime chat and notifications after the core data model is verified.
