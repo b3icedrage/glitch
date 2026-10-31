@@ -45,7 +45,7 @@ export const KelviqPricingModal: React.FC<KelviqPricingModalProps> = ({
       setLoading(true);
       setErrorMsg(null);
 
-      const res = await fetch('https://glitch-bice.vercel.app/api/kelviq/checkout', {
+      const res = await fetch('https://glitch-api-proxy.kipkiruibrian102198.workers.dev/api/kelviq/checkout', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -83,7 +83,7 @@ export const KelviqPricingModal: React.FC<KelviqPricingModalProps> = ({
       setPortalLoading(true);
       setErrorMsg(null);
 
-      const res = await fetch('https://glitch-bice.vercel.app/api/kelviq/portal', {
+      const res = await fetch('https://glitch-api-proxy.kipkiruibrian102198.workers.dev/api/kelviq/portal', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
