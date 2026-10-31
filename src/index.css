@@ -36,6 +36,7 @@
   body {
     min-width: 320px;
     min-height: 100vh;
+    min-height: 100dvh;
     margin: 0;
     font-family: var(--font-body);
     background:
@@ -48,6 +49,7 @@
 
   #root {
     min-height: 100vh;
+    min-height: 100dvh;
     isolation: isolate;
   }
 
@@ -231,4 +233,41 @@
 }
 [class*="to-cyan-"], [class*="to-blue-"], [class*="to-indigo-"], [class*="to-fuchsia-"] {
   --tw-gradient-to: #ffc3a5 var(--tw-gradient-to-position) !important;
+}
+
+
+/* Viewport-aware layouts: account for the sticky header, mobile navigation,
+   and Android/iOS safe areas instead of assuming a fixed 100vh viewport. */
+@layer components {
+  .sparks-viewport {
+    height: min(920px, calc(100dvh - 65px));
+    max-height: 920px;
+    min-height: 0;
+  }
+
+  .dm-viewport {
+    height: min(820px, calc(100dvh - 140px));
+    min-height: min(640px, calc(100dvh - 140px));
+  }
+
+  .live-viewport {
+    min-height: calc(100dvh - 65px);
+  }
+}
+
+@media (max-width: 767px) {
+  .sparks-viewport {
+    height: calc(100dvh - 129px - env(safe-area-inset-bottom));
+    max-height: none;
+  }
+
+  .dm-viewport {
+    height: calc(100dvh - 161px - env(safe-area-inset-bottom));
+    min-height: 0;
+    max-height: none;
+  }
+
+  .live-viewport {
+    min-height: calc(100dvh - 129px - env(safe-area-inset-bottom));
+  }
 }
