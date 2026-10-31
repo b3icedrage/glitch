@@ -54,19 +54,55 @@ function readSession(): SupabaseSession | null {
 }
 
 async function authRequest<T>(endpoint: string, body?: unknown, accessToken?: string): Promise<T> {
-  if (!configured) throw new Error('Supabase is not configured yet. Add the two VITE_SUPABASE environment variables.');
-  const response = await fetch(`${SUPABASE_URL}/auth/v1/${endpoint}`, {
-    method: body === undefined ? 'GET' : 'POST',
-    headers: {
-      apikey: SUPABASE_ANON_KEY,
-      'Content-Type': 'application/json',
-      ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
-    },
-    ...(body === undefined ? {} : { body: JSON.stringify(body) }),
-  });
-  const data = await response.json().catch(() => ({}));
+  if (!configured) {
+    throw new Error('Supabase is not configured yet. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to the deployment environment, then redeploy.');
+  }
+
+  let response: Response;
+  try {
+    response = await fetch(`${SUPABASE_URL}/auth/v1/${endpoint}`, {
+      method: body === undefined ? 'GET' : 'POST',
+      headers: {
+        apikey: SUPABASE_ANON_KEY,
+        'Content-Type': 'application/json',
+        ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+      },
+      ...(body === undefined ? {} : { body: JSON.stringify(body) }),
+    });
+  } catch (error) {
+    if (error instanceof TypeError) {
+      throw new Error('Could not reach Supabase. Check the Supabase project URL, project status, and allowed network origins, then try again.');
+    }
+    throw error;
+  }
+
+  const responseText = await response.text();
+  let data: Record<string, unknown> = {};
+  try {
+    const parsed: unknown = responseText ? JSON.parse(responseText) : {};
+    if (parsed && typeof parsed === 'object') data = parsed as Record<string, unknown>;
+  } catch {
+    // Keep the response body out of the UI; it may contain HTML or infrastructure details.
+  }
+
   if (!response.ok) {
-    throw new Error(data.msg || data.message || data.error_description || data.error || 'Authentication request failed.');
+    const message = [
+      data.msg,
+      data.message,
+      data.error_description,
+      data.error,
+      data.error_code,
+      data.code,
+    ].find((value) => typeof value === 'string' && value.trim()) as string | undefined;
+    const hint = typeof data.hint === 'string' ? ` ${data.hint}` : '';
+    const detail = message || (responseText
+      ? 'Supabase returned a non-JSON response.'
+      : 'Supabase returned an empty error response.');
+    throw new Error(`Authentication failed (HTTP ${response.status}): ${detail}.${hint}`);
+  }
+
+  if (responseText && Object.keys(data).length === 0) {
+    throw new Error('Supabase returned an unexpected response. Verify the configured Supabase project URL.');
   }
   return data as T;
 }
