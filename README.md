@@ -42,7 +42,7 @@ Glitch uses Firebase Authentication for email/password accounts. The frontend ca
    - `VITE_FIREBASE_MESSAGING_SENDER_ID` (optional)
    - `VITE_FIREBASE_STORAGE_BUCKET` (optional)
 5. In **Authentication → Settings → Authorized domains**, add the Glitch production domain and any preview domain used for testing.
-6. The server reads `FIREBASE_API_KEY` or `VITE_FIREBASE_API_KEY` to validate ID tokens for protected billing routes. This is the Firebase web API key, not a service-account private key.
+6. The server reads `FIREBASE_API_KEY` to validate ID tokens for protected billing routes. Use a separate Google API key restricted to the Firebase Identity Toolkit API; never use a service-account private key in frontend configuration.
 
 Do not put Firebase service-account credentials or private keys in frontend variables or Git. Existing Supabase accounts are not copied automatically; users must create Firebase accounts unless a separate secure user migration is completed.
 
