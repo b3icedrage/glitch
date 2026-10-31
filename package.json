@@ -9,7 +9,11 @@
     "build": "vite build",
     "preview": "vite preview",
     "clean": "rm -rf dist server.js",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "convex:dev": "convex dev",
+    "convex:deploy": "convex deploy",
+    "pages:dev": "wrangler pages dev dist",
+    "pages:deploy": "wrangler pages deploy dist --project-name=glitch-frontend"
   },
   "dependencies": {
     "@google/genai": "^2.4.0",
@@ -22,7 +26,13 @@
     "express": "^4.21.2",
     "dotenv": "^17.2.3",
     "motion": "^12.23.24",
-    "@kelviq/node-sdk": "^2.9.0"
+    "@kelviq/node-sdk": "^2.9.0",
+    "@aws-sdk/client-s3": "^3.900.0",
+    "@aws-sdk/s3-request-presigner": "^3.900.0",
+    "@convex-dev/better-auth": "^0.12.5",
+    "better-auth": "^1.7.6",
+    "convex": "^1.25.0",
+    "posthog-js": "^1.439.2"
   },
   "devDependencies": {
     "@kelviq/cli": "^0.4.2",
@@ -34,6 +44,7 @@
     "tailwindcss": "^4.3.3",
     "tsx": "^4.21.0",
     "typescript": "^7.0.2",
-    "@types/express": "^4.17.21"
+    "@types/express": "^4.17.21",
+    "wrangler": "^4.44.0"
   }
 }
