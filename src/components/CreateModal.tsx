@@ -6,7 +6,7 @@ interface CreateModalProps {
   isOpen: boolean;
   onClose: () => void;
   currentUser: User;
-  onPublishFeedPost: (post: FeedPost) => void;
+  onPublishFeedPost: (post: FeedPost, file?: File) => Promise<void> | void;
   onPublishSpark: (spark: SparkReel) => void;
   onPublishCinemaVideo: (video: CinemaVideo) => void;
   onPublishStory: (story: UserStory) => void;
@@ -27,7 +27,7 @@ export const CreateModal: React.FC<CreateModalProps> = ({
   const [location, setLocation] = useState('');
   const [category, setCategory] = useState('Tech & Hardware');
   const [selectedPresetIndex, setSelectedPresetIndex] = useState(0);
-  const [uploadedMedia, setUploadedMedia] = useState<{ title: string; url: string; videoUrl: string; kind: 'image' | 'video' } | null>(null);
+  const [uploadedMedia, setUploadedMedia] = useState<{ title: string; url: string; videoUrl: string; kind: 'image' | 'video'; file?: File } | null>(null);
   const [filterStyle, setFilterStyle] = useState<'none' | 'cyber' | 'noir' | 'warm'>('none');
   const [selectedSound, setSelectedSound] = useState('Glitch Beats Vol. 4');
 
@@ -82,11 +82,12 @@ export const CreateModal: React.FC<CreateModalProps> = ({
       title: file.name,
       url: isImage ? objectUrl : poster,
       videoUrl: isVideo ? objectUrl : mediaPresets[selectedPresetIndex].videoUrl,
-      kind: isVideo ? 'video' : 'image'
+      kind: isVideo ? 'video' : 'image',
+      file
     });
   };
 
-  const handlePublish = (e: React.FormEvent) => {
+  const handlePublish = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (contentType === 'spark') {
@@ -126,7 +127,12 @@ export const CreateModal: React.FC<CreateModalProps> = ({
         tags: ['glitch', 'creator', 'visualart'],
         comments: []
       };
-      onPublishFeedPost(newPost);
+      try {
+        await onPublishFeedPost(newPost, uploadedMedia?.file);
+      } catch (error) {
+        window.alert(error instanceof Error ? error.message : 'Could not publish your post. Please try again.');
+        return;
+      }
     } else if (contentType === 'tube') {
       const newVideo: CinemaVideo = {
         id: `cinema_${Date.now()}`,
