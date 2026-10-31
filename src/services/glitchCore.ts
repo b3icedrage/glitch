@@ -99,7 +99,7 @@ export async function getMyProfile(user: SupabaseUser, accessToken: string): Pro
 export async function updateMyProfile(
   user: SupabaseUser,
   accessToken: string,
-  changes: Pick<Partial<CreatorProfile>, 'display_name' | 'avatar_url' | 'bio' | 'website_url'>
+  changes: Pick<Partial<CreatorProfile>, 'handle' | 'display_name' | 'avatar_url' | 'bio' | 'website_url'>
 ): Promise<CreatorProfile> {
   const rows = await request<CreatorProfile[]>(
     `profiles?id=eq.${encodeURIComponent(user.id)}&select=id,handle,display_name,avatar_url,bio,website_url,created_at,updated_at`,
