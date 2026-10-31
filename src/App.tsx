@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useSupabaseAuth } from './auth/supabaseAuth';
+import { useFirebaseAuth } from './auth/firebaseAuth';
 import {
   PlatformMode,
   User,
