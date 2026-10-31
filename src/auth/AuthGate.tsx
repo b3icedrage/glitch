@@ -6,6 +6,7 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
   const [mode, setMode] = useState<'signin' | 'signup' | 'reset'>('signin');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
@@ -18,6 +19,10 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
+    if (auth.isPasswordRecovery && password !== confirmPassword) {
+      setError('The passwords do not match.');
+      return;
+    }
     setBusy(true);
     setError('');
     setMessage('');
@@ -26,6 +31,7 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
         await auth.updatePassword(password);
         auth.clearPasswordRecovery();
         setPassword('');
+        setConfirmPassword('');
         setMessage('Your password has been updated.');
       } else if (mode === 'signin') {
         await auth.signIn(email.trim(), password);
