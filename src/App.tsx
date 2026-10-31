@@ -292,7 +292,7 @@ export default function App() {
   const unreadMessagesCount = chats.reduce((acc, c) => acc + (c.unreadCount || 0), 0);
 
   return (
-    <div className="min-h-screen bg-[#0b100c] text-[#f3f5ee] flex flex-col font-['Plus_Jakarta_Sans'] selection:bg-[#ffc3a5] selection:text-[#182017]">
+    <div className="min-h-screen bg-[#070b10] text-[#eef8fb] flex flex-col font-['Plus_Jakarta_Sans'] selection:bg-[#00e5ff] selection:text-[#061116]">
       
       {/* Top Header */}
       <Header
@@ -309,11 +309,11 @@ export default function App() {
 
       {/* Kelviq Billing Toast */}
       {billingToast && (
-        <div className="bg-gradient-to-r from-[#477b43] to-[#f0b08f] text-white font-mono text-xs py-2 px-4 text-center font-bold sticky top-[57px] z-30 shadow-lg animate-fade-in flex items-center justify-center gap-2">
+        <div className="bg-gradient-to-r from-[#00e5ff] to-[#b7ff3c] text-[#061116] font-mono text-xs py-2 px-4 text-center font-bold sticky top-[57px] z-30 shadow-lg animate-fade-in flex items-center justify-center gap-2">
           <span>{billingToast}</span>
           <button
             onClick={() => setBillingToast(null)}
-            className="ml-3 text-[#ffe0cf] hover:text-white underline text-[11px]"
+            className="ml-3 text-[#12313a] hover:text-black underline text-[11px]"
           >
             Close
           </button>
