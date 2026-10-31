@@ -1,103 +1,66 @@
 # GLITCH
 
-**A creator-first social playground for short video, live moments, stories, and community.**
+**Glitch is an Android-first creator community app** for short videos, live moments, stories, long-form video, and direct messages.
 
-Glitch brings fast, expressive creator experiences into a deep forest-green interface with soft peach accents. Explore the Sparks vertical feed, browse the following feed, discover creators, watch long-form videos, join live rooms, share stories, and message your community.
+The repository contains the React + TypeScript application and its Android packaging configuration. The Android app is built with Capacitor and runs the Glitch interface inside a native Android WebView, with Android status-bar, splash-screen, keyboard, safe-area, and touch behavior configured for phones.
 
-> This repository is an actively evolving product prototype. Review the configuration and server integrations before using it with real users or processing payments.
+## Android APK
 
-## What’s inside
+Every push to `main` and every manual run triggers **Build Glitch Android APK** in GitHub Actions.
 
-- **Sparks** — a vertical short-form video experience.
-- **Following feed & stories** — creator posts and story viewing.
-- **Explore** — discover posts, reels, and channels.
-- **Live** — interactive live-room UI with chat and creator tipping flows.
-- **Cinema** — long-form video browsing and channel subscriptions.
-- **Direct messages** — conversation inbox and messaging UI.
-- **Creator tools** — upload/create flows, comments, notifications, and profile views.
-- **Sound Hub & effects** — sound discovery and client-side audio/visual effects.
-- **Optional integrations** — server routes for Gemini-powered features and Kelviq billing/usage.
+1. Open the repository's **Actions** tab.
+2. Select **Build Glitch Android APK**.
+3. Open the successful workflow run.
+4. Under **Artifacts**, download `glitch-android-debug-apk`.
+5. Extract the ZIP and install `app-debug.apk` on an Android device.
 
-## Stack
+This workflow currently produces a **debug APK** for testing and sideloading. A signed release APK/AAB requires a private Android signing key and passwords stored as GitHub Actions secrets; never commit those secrets.
 
-- React 19 + TypeScript
-- Vite
-- Tailwind CSS 4
-- Lucide icons
-- Express + TypeScript server
-- Google GenAI SDK and Kelviq Node SDK for optional integrations
+## Build locally
 
-## Firebase Authentication setup
-
-Glitch uses Firebase Authentication for email/password accounts. The frontend calls Firebase's Identity Toolkit REST API and stores Firebase ID tokens with refresh tokens in browser local storage. Protected Kelviq routes validate ID tokens with Firebase before continuing.
-
-1. Create a Firebase project in [Firebase Console](https://console.firebase.google.com/).
-2. Open **Authentication → Sign-in method** and enable **Email/Password**.
-3. In **Project settings → General → Your apps**, register a Web app and copy its config values.
-4. Add these Vercel environment variables for **Production** and **Preview**, then redeploy:
-   - `VITE_FIREBASE_API_KEY`
-   - `VITE_FIREBASE_AUTH_DOMAIN`
-   - `VITE_FIREBASE_PROJECT_ID`
-   - `VITE_FIREBASE_APP_ID`
-   - `VITE_FIREBASE_MESSAGING_SENDER_ID` (optional)
-   - `VITE_FIREBASE_STORAGE_BUCKET` (optional)
-5. In **Authentication → Settings → Authorized domains**, add the Glitch production domain and any preview domain used for testing.
-6. The server reads `FIREBASE_API_KEY` to validate ID tokens for protected billing routes. Use a separate Google API key restricted to the Firebase Identity Toolkit API; never use a service-account private key in frontend configuration.
-
-Do not put Firebase service-account credentials or private keys in frontend variables or Git. Existing Supabase accounts are not copied automatically; users must create Firebase accounts unless a separate secure user migration is completed.
-
-## Run locally
-
-Requirements: Node.js compatible with the versions in `package.json` and npm.
+Requirements: Node.js 22, Java 21, Android SDK, and Android platform build tools.
 
 ```bash
 npm install
-cp .env.example .env
-npm run dev
+npm run android:build
 ```
 
-Open the local URL printed by Vite/the development server. Add only the credentials for integrations you actually intend to use; never commit your real `.env` file or API keys.
-
-## Useful commands
+To open the generated Android project in Android Studio:
 
 ```bash
-npm run dev    # Start the development server
-npm run build  # Build the production frontend
-npm run preview # Preview the built frontend
-npm run lint   # Type-check the TypeScript project
+npm run android:open
 ```
 
-## Configuration
+## App identity and Android settings
 
-See [`.env.example`](./.env.example) for supported environment variables. Keep server-only credentials on the server. Do not put secret keys in frontend variables or browser code.
+- Application ID: `com.glitch.creator`
+- Display name: `Glitch`
+- Web assets: `dist/`
+- Android wrapper: Capacitor
+- Theme: dark forest green with soft peach accents
+- Android status bar and splash screen use the Glitch dark theme
+- Keyboard resizes the native viewport for messaging and forms
 
-## Payment safety status\n\n- Kelviq checkout and portal sessions are created server-side, but webhook subscription lifecycle handling is still TODO and must be completed before production use.\n- PesaPal direct-payment simulation has been disabled because it previously returned fabricated success and settlement details.\n- PesaPal authentication no longer returns provider credentials to the browser, and failed checkout responses no longer generate fake checkout URLs.\n- Configure valid provider credentials and implement durable order storage plus server-side transaction-status verification before granting credits or creator payouts.\n\n## Before production
+## Product features
 
-- Replace demo/mock content with a persistent, authenticated data layer.
-- Verify authentication, authorization, upload limits, moderation, and rate limiting.
-- Test payment webhooks and confirm payment status server-side before granting entitlements or issuing receipts.
-- Review privacy, data retention, accessibility, and mobile layouts.
-- Run the build and type-check commands, then exercise the main user flows on a real device.
-- Configure production secrets in your hosting provider rather than in source control.
+- Sparks vertical short-video feed
+- Following feed and stories
+- Explore and creator discovery
+- Live-room interface
+- Cinema long-form video browsing
+- Direct messages
+- Creator uploads, comments, notifications, and profiles
+- Firebase email/password authentication
+- Server-side billing and optional AI integrations
 
-## Project structure
+## Backend and production notes
 
-```text
-src/
-  components/   UI views, drawers, and modals
-  data/         Demo content and seed data
-  services/     Client-side feature services
-  server/       Server integration helpers
-  types/        Shared TypeScript types
-  App.tsx       Application state and view routing
-  index.css     Global styles and design foundations
-server.ts       Express development/server entry point
-```
+The APK is a client. It does **not** embed the Express server, API credentials, Firebase service-account keys, payment secrets, or other server-only configuration. Those remain on the hosted backend.
 
-## Contributing
+Firebase client authentication is used from the Android WebView. Any API/proxy CORS allowlist must explicitly permit the Capacitor Android origin (`https://localhost` / `capacitor://localhost`) before those API calls can work in the APK. Payment checkout and account portal flows must be tested in the Android app and opened in a supported external browser when required.
 
-Keep changes focused, use the existing component patterns, and run `npm run lint` and `npm run build` before opening a pull request. Prefer accessible labels, useful empty/error states, and small reusable components over one-off UI hacks.
+The prototype still uses local device storage and mock/demo content for parts of the social experience. A native APK package does not by itself make posts, messages, uploads, or follows synchronize across users. A persistent authenticated database, media storage, moderation, and server-side authorization are still required before public launch.
 
----
+## Web preview
 
-Built for creators. Designed for the scroll.
+The GitHub Pages deployment remains available as a browser preview. It is not the Android APK and does not replace the Android build workflow.
