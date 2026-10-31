@@ -16,7 +16,7 @@ import {
   handleReportUsage,
   handleWebhook,
 } from './src/server/kelviq';
-import { requireSupabaseUser } from './src/server/supabaseAuth';
+import { requireFirebaseUser } from './src/server/firebaseAuth';
 
 dotenv.config();
 dotenv.config({ path: path.resolve(process.cwd(), '.env.local'), override: true });
