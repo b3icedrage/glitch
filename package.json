@@ -9,7 +9,10 @@
     "build": "vite build",
     "preview": "vite preview",
     "clean": "rm -rf dist server.js",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "android:sync": "npm run build && cap sync android",
+    "android:build": "npm run build && cap sync android && cd android && ./gradlew assembleDebug",
+    "android:open": "cap open android"
   },
   "dependencies": {
     "@google/genai": "^2.4.0",
@@ -22,7 +25,8 @@
     "express": "^4.21.2",
     "dotenv": "^17.2.3",
     "motion": "^12.23.24",
-    "@kelviq/node-sdk": "^2.9.0"
+    "@kelviq/node-sdk": "^2.9.0",
+    "@capacitor/core": "^7.4.3"
   },
   "devDependencies": {
     "@kelviq/cli": "^0.4.2",
@@ -34,6 +38,7 @@
     "tailwindcss": "^4.3.3",
     "tsx": "^4.21.0",
     "typescript": "^7.0.2",
-    "@types/express": "^4.17.21"
+    "@types/express": "^4.17.21",
+    "@capacitor/cli": "^7.4.3"
   }
 }
