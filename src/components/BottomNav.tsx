@@ -17,7 +17,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
   unreadCount = 2
 }) => {
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#090a0f]/95 backdrop-blur-lg border-t border-slate-800/80 px-2 py-1.5 flex items-center justify-around pb-safe">
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#090a0f]/95 backdrop-blur-lg border-t border-slate-800/80 px-2 py-1.5 pb-[calc(0.375rem+env(safe-area-inset-bottom))] flex items-center justify-around">
       <button
         onClick={() => onSelectMode('feed')}
         className={`flex flex-col items-center justify-center min-h-[44px] min-w-[44px] px-2 transition-colors ${
