@@ -6,12 +6,15 @@
     --font-display: 'Outfit', sans-serif;
     --font-body: 'Plus Jakarta Sans', sans-serif;
     --font-mono: 'JetBrains Mono', monospace;
-    --color-canvas: #0b100c;
-    --color-panel: #151c16;
-    --color-line: rgba(164, 190, 157, 0.18);
-    --color-muted: #b2b9ad;
-    --color-cyan: #8fca83;
-    --color-pink: #ffc3a5;
+    /* GLITCH brand palette: Electric Cyan, Toxic Lime, Carbon. */
+    --color-canvas: #070b10;
+    --color-panel: #101820;
+    --color-panel-raised: #17232c;
+    --color-line: rgba(0, 229, 255, 0.16);
+    --color-muted: #9aabb5;
+    --color-cyan: #00e5ff;
+    --color-lime: #b7ff3c;
+    --color-carbon: #070b10;
     font-synthesis: none;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
@@ -40,10 +43,10 @@
     margin: 0;
     font-family: var(--font-body);
     background:
-      radial-gradient(ellipse at 14% -12%, rgba(108, 169, 92, 0.13), transparent 38rem),
-      radial-gradient(ellipse at 92% 0%, rgba(255, 185, 148, 0.12), transparent 34rem),
+      radial-gradient(ellipse at 12% -14%, rgba(0, 229, 255, 0.12), transparent 38rem),
+      radial-gradient(ellipse at 92% 0%, rgba(183, 255, 60, 0.07), transparent 34rem),
       var(--color-canvas);
-    color: #f3f5ee;
+    color: #eef8fb;
     overflow-x: clip;
   }
 
@@ -84,8 +87,8 @@
   }
 
   ::selection {
-    color: #182017;
-    background: rgba(255, 195, 165, 0.9);
+    color: #061116;
+    background: rgba(0, 229, 255, 0.9);
   }
 
   :focus-visible {
@@ -107,18 +110,18 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(21, 32, 22, 0.55);
+  background: rgba(16, 24, 32, 0.8);
 }
 
 ::-webkit-scrollbar-thumb {
   border: 2px solid transparent;
   border-radius: 9999px;
-  background: rgba(164, 190, 157, 0.32);
+  background: rgba(0, 229, 255, 0.28);
   background-clip: padding-box;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(143, 202, 131, 0.48);
+  background: rgba(0, 229, 255, 0.55);
   background-clip: padding-box;
 }
 
@@ -134,7 +137,7 @@
 /* Reusable finishing touches for panels and interactive surfaces. */
 .glass-panel {
   border: 1px solid var(--color-line);
-  background: rgba(21, 28, 22, 0.82);
+  background: rgba(16, 24, 32, 0.88);
   box-shadow: 0 18px 55px rgba(0, 0, 0, 0.22);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
@@ -149,7 +152,7 @@
 }
 
 .interactive-surface:hover {
-  border-color: rgba(143, 202, 131, 0.36);
+  border-color: rgba(0, 229, 255, 0.48);
 }
 
 .interactive-surface:active {
@@ -216,25 +219,41 @@
 }
 
 
-/* Palette bridge for legacy Tailwind utility classes used across older views. */
-[class*="text-cyan-"], [class*="text-blue-"], [class*="text-indigo-"], [class*="text-fuchsia-"] {
-  color: #a6d99b !important;
+/* Palette bridge for legacy Tailwind classes. Cyan is primary; lime is secondary. */
+[class*="text-cyan-"], [class*="text-blue-"], [class*="text-indigo-"] {
+  color: #00e5ff !important;
 }
-[class*="border-cyan-"], [class*="border-blue-"], [class*="border-indigo-"], [class*="border-fuchsia-"] {
-  border-color: rgba(143, 202, 131, 0.42) !important;
+[class*="text-fuchsia-"] {
+  color: #b7ff3c !important;
 }
-[class*="bg-cyan-"], [class*="bg-blue-"], [class*="bg-indigo-"], [class*="bg-fuchsia-"] {
-  background-color: #203522 !important;
+[class*="border-cyan-"], [class*="border-blue-"], [class*="border-indigo-"] {
+  border-color: rgba(0, 229, 255, 0.46) !important;
 }
-[class*="from-cyan-"], [class*="from-blue-"], [class*="from-indigo-"], [class*="from-fuchsia-"] {
-  --tw-gradient-from: #8fca83 var(--tw-gradient-from-position) !important;
-  --tw-gradient-to: rgb(143 202 131 / 0) var(--tw-gradient-to-position) !important;
+[class*="border-fuchsia-"] {
+  border-color: rgba(183, 255, 60, 0.42) !important;
+}
+[class*="bg-cyan-"], [class*="bg-blue-"], [class*="bg-indigo-"] {
+  background-color: #07313a !important;
+}
+[class*="bg-fuchsia-"] {
+  background-color: #263817 !important;
+}
+[class*="from-cyan-"], [class*="from-blue-"], [class*="from-indigo-"] {
+  --tw-gradient-from: #00e5ff var(--tw-gradient-from-position) !important;
+  --tw-gradient-to: rgb(0 229 255 / 0) var(--tw-gradient-to-position) !important;
   --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
 }
-[class*="to-cyan-"], [class*="to-blue-"], [class*="to-indigo-"], [class*="to-fuchsia-"] {
-  --tw-gradient-to: #ffc3a5 var(--tw-gradient-to-position) !important;
+[class*="from-fuchsia-"] {
+  --tw-gradient-from: #b7ff3c var(--tw-gradient-from-position) !important;
+  --tw-gradient-to: rgb(183 255 60 / 0) var(--tw-gradient-to-position) !important;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
 }
-
+[class*="to-cyan-"], [class*="to-blue-"], [class*="to-indigo-"] {
+  --tw-gradient-to: #00e5ff var(--tw-gradient-to-position) !important;
+}
+[class*="to-fuchsia-"] {
+  --tw-gradient-to: #b7ff3c var(--tw-gradient-to-position) !important;
+}
 
 /* Viewport-aware layouts: account for the sticky header, mobile navigation,
    and Android/iOS safe areas instead of assuming a fixed 100vh viewport. */

@@ -17,7 +17,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
   unreadCount = 2
 }) => {
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#090a0f]/95 backdrop-blur-lg border-t border-slate-800/80 px-2 py-1.5 pb-[calc(0.375rem+env(safe-area-inset-bottom))] flex items-center justify-around">
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#070b10]/95 backdrop-blur-lg border-t border-[#1c303b] px-2 py-1.5 pb-[calc(0.375rem+env(safe-area-inset-bottom))] flex items-center justify-around">
       <button
         onClick={() => onSelectMode('feed')}
         className={`flex flex-col items-center justify-center min-h-[44px] min-w-[44px] px-2 transition-colors ${
@@ -51,7 +51,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
         <div className="relative">
           <MessageCircle className={`w-5 h-5 ${currentMode === 'messages' ? 'stroke-[2.5] text-cyan-400' : ''}`} />
           {unreadCount > 0 && (
-            <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-cyan-400 ring-2 ring-[#090a0f]" />
+            <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-cyan-400 ring-2 ring-[#070b10]" />
           )}
         </div>
         <span className="text-[10px] font-medium mt-1">Direct</span>
@@ -64,7 +64,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
         }`}
         aria-label="Watch"
       >
-        <PlaySquare className={`w-5 h-5 ${currentMode === 'tube' ? 'stroke-[2.5] text-red-400' : ''}`} />
+        <PlaySquare className={`w-5 h-5 ${currentMode === 'tube' ? 'stroke-[2.5] text-lime-400' : ''}`} />
         <span className="text-[10px] font-medium mt-1">Watch</span>
       </button>
 
