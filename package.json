@@ -25,7 +25,6 @@
     "@kelviq/node-sdk": "^2.9.0"
   },
   "devDependencies": {
-    "@kelviq/cli": "^0.4.2",
     "@types/node": "^22.14.0",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
