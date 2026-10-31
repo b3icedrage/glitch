@@ -17,7 +17,7 @@ import {
 
 interface ProfileViewProps {
   currentUser: User;
-  onUpdateUser: (updated: Partial<User>) => void;
+  onUpdateUser: (updated: Partial<User>) => Promise<void>;
   userPosts: FeedPost[];
   userSparks: SparkReel[];
   userVideos: CinemaVideo[];
@@ -46,21 +46,38 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
   const [editBio, setEditBio] = useState(currentUser.bio);
   const [editHandle, setEditHandle] = useState(currentUser.handle);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 2500);
   };
 
-  const handleSaveProfile = (e: React.FormEvent) => {
+  const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
-    onUpdateUser({
-      name: editName,
-      bio: editBio,
-      handle: editHandle
-    });
-    setIsEditing(false);
-    showToast('Profile updated successfully!');
+    const cleanHandle = editHandle.trim().replace(/^@/, '').toLowerCase();
+    if (editName.trim().length < 1 || editName.trim().length > 80) {
+      showToast('Display name must be 1–80 characters.');
+      return;
+    }
+    if (!/^[a-z0-9_]{3,30}$/.test(cleanHandle)) {
+      showToast('Handle must be 3–30 letters, numbers or underscores.');
+      return;
+    }
+    if (editBio.length > 500) {
+      showToast('Bio must be 500 characters or fewer.');
+      return;
+    }
+    setIsSavingProfile(true);
+    try {
+      await onUpdateUser({ name: editName.trim(), bio: editBio.trim(), handle: cleanHandle });
+      setIsEditing(false);
+      showToast('Profile saved to your account.');
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : 'Could not save your profile.');
+    } finally {
+      setIsSavingProfile(false);
+    }
   };
 
   return (
@@ -245,9 +262,10 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-fuchsia-600 text-white font-semibold shadow-md"
+                  disabled={isSavingProfile}
+                  className="px-5 py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-fuchsia-600 text-white font-semibold shadow-md disabled:opacity-50"
                 >
-                  Save Changes
+                  {isSavingProfile ? 'Saving…' : 'Save Changes'}
                 </button>
               </div>
             </form>
