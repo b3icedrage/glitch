@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSupabaseAuth } from './auth/supabaseAuth';
-import { getMyProfile, updateMyProfile } from './services/glitchCore';
+import { getMyProfile, updateMyProfile, getPublicFeed, getMyFollowIds, setPostLike, savePost, followCreator, unfollowCreator, addPostComment, getPostComments, createPost, uploadPostMedia, deletePost, type CorePost, type CoreComment } from './services/glitchCore';
 import {
   PlatformMode,
   User,
@@ -46,6 +46,57 @@ import { NotificationsDrawer } from './components/NotificationsDrawer';
 import { StoryViewerModal } from './components/StoryViewerModal';
 import { SoundHubModal } from './components/SoundHubModal';
 import { KelviqPricingModal } from './components/KelviqPricingModal';
+
+function isUuid(value: string): boolean {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
+}
+
+function mapCorePost(post: CorePost, viewer: User): FeedPost {
+  const profile = post.profiles;
+  const rawHandle = profile?.handle || 'creator';
+  const author: User = {
+    ...viewer,
+    id: profile?.id || post.author_id,
+    name: profile?.display_name || 'Glitch creator',
+    handle: rawHandle.startsWith('@') ? rawHandle : `@${rawHandle}`,
+    avatar: profile?.avatar_url || viewer.avatar,
+    bio: profile?.bio || '',
+  };
+  const caption = post.caption || '';
+  return {
+    id: post.id,
+    author,
+    images: post.media_url ? [post.media_url] : [author.avatar],
+    caption,
+    location: post.location || undefined,
+    likesCount: post.post_likes?.length || 0,
+    isLiked: Boolean(post.post_likes?.some((like) => like.user_id === viewer.id)),
+    isSaved: Boolean(post.post_saves?.some((save) => save.user_id === viewer.id)),
+    commentsCount: post.comments?.length || 0,
+    comments: [],
+    timestamp: new Date(post.created_at).toLocaleString(),
+    tags: Array.from(caption.matchAll(/#([a-z0-9_]+)/gi)).map((match) => match[1]),
+  };
+}
+
+function mapCoreComment(comment: CoreComment, viewer: User): Comment {
+  const profile = comment.profiles;
+  const handle = profile?.handle || 'creator';
+  return {
+    id: comment.id,
+    user: {
+      ...viewer,
+      id: profile?.id || comment.author_id,
+      handle: handle.startsWith('@') ? handle : `@${handle}`,
+      name: profile?.display_name || 'Glitch creator',
+      avatar: profile?.avatar_url || viewer.avatar,
+    },
+    text: comment.body,
+    timestamp: new Date(comment.created_at).toLocaleString(),
+    likesCount: 0,
+    isLiked: false,
+  };
+}
 
 function readStoredState<T>(key: string, fallback: T): T {
   try {
@@ -158,6 +209,24 @@ export default function App() {
     return () => { active = false; };
   }, [auth.session?.user?.id, auth.session?.access_token]);
 
+  // Load cloud posts and follow relationships for the authenticated account.
+  useEffect(() => {
+    const session = auth.session;
+    if (!session?.user?.id) return;
+    let active = true;
+    Promise.all([
+      getPublicFeed(session.access_token, session.user.id),
+      getMyFollowIds(session.user.id, session.access_token),
+    ]).then(([cloudPosts, followIds]) => {
+      if (!active) return;
+      setFeedPosts(cloudPosts.map((post) => mapCorePost(post, currentUser)));
+      setFollowedUserIds(new Set(followIds));
+    }).catch((error) => {
+      console.warn('Could not load the cloud feed:', error);
+    });
+    return () => { active = false; };
+  }, [auth.session?.user?.id, auth.session?.access_token]);
+
   const handleUpdateCreatorProfile = async (updated: Partial<User>) => {
     const session = auth.session;
     if (!session?.user?.id) throw new Error('Sign in to update your creator profile.');
@@ -218,17 +287,48 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Follow/Unfollow toggle
-  const handleToggleFollow = (userId: string) => {
+  // Follow/Unfollow persists for real creator IDs; demo creators remain local.
+  const handleToggleFollow = async (userId: string) => {
+    const wasFollowing = followedUserIds.has(userId);
     setFollowedUserIds((prev) => {
       const next = new Set(prev);
-      if (next.has(userId)) {
-        next.delete(userId);
-      } else {
-        next.add(userId);
-      }
+      if (wasFollowing) next.delete(userId);
+      else next.add(userId);
       return next;
     });
+    const session = auth.session;
+    if (!session?.user?.id || !isUuid(userId)) return;
+    try {
+      if (wasFollowing) await unfollowCreator(session.user.id, userId, session.access_token);
+      else await followCreator(session.user.id, userId, session.access_token);
+    } catch (error) {
+      setFollowedUserIds((prev) => {
+        const next = new Set(prev);
+        if (wasFollowing) next.add(userId);
+        else next.delete(userId);
+        return next;
+      });
+      console.warn('Could not update follow relationship:', error);
+    }
+  };
+
+  const handleUpdateFeedPost = async (postId: string, updates: Partial<FeedPost>) => {
+    const session = auth.session;
+    const post = feedPosts.find((item) => item.id === postId);
+    if (!post) return;
+    setFeedPosts((prev) => prev.map((item) => item.id === postId ? { ...item, ...updates } : item));
+    if (!session?.user?.id || !isUuid(postId)) return;
+    try {
+      if (typeof updates.isLiked === 'boolean') {
+        await setPostLike(postId, session.user.id, updates.isLiked, session.access_token);
+      }
+      if (typeof updates.isSaved === 'boolean') {
+        await savePost(postId, session.user.id, updates.isSaved, session.access_token);
+      }
+    } catch (error) {
+      setFeedPosts((prev) => prev.map((item) => item.id === postId ? post : item));
+      console.warn('Could not persist post interaction:', error);
+    }
   };
 
   // Channel Subscribe toggle
@@ -244,7 +344,7 @@ export default function App() {
     });
   };
 
-  // Open comments for reel or feed post
+  // Open comments immediately, then refresh persisted comments for cloud posts.
   const handleOpenComments = (item: SparkReel | FeedPost) => {
     setActiveCommentsItem({
       id: item.id,
@@ -252,12 +352,20 @@ export default function App() {
       comments: item.comments || [],
     });
     setIsCommentsOpen(true);
+    const session = auth.session;
+    if (session?.access_token && isUuid(item.id)) {
+      getPostComments(item.id, session.access_token).then((rows) => {
+        const comments = rows.map((comment) => mapCoreComment(comment, currentUser));
+        setActiveCommentsItem((previous) => previous?.id === item.id ? { ...previous, comments } : previous);
+      }).catch((error) => console.warn('Could not load comments:', error));
+    }
   };
 
-  // Add new comment
-  const handleAddComment = (text: string) => {
+  // Save comments to Supabase for cloud posts; keep prototype comments local.
+  const handleAddComment = async (text: string) => {
     if (!activeCommentsItem) return;
-    const newComment: Comment = {
+    const targetId = activeCommentsItem.id;
+    let newComment: Comment = {
       id: `comm_${Date.now()}`,
       user: currentUser,
       text,
@@ -265,15 +373,22 @@ export default function App() {
       likesCount: 0,
       isLiked: false,
     };
-
+    const session = auth.session;
+    if (session?.access_token && isUuid(targetId)) {
+      try {
+        const saved = await addPostComment(targetId, session.user.id, text, session.access_token);
+        newComment = mapCoreComment(saved, currentUser);
+      } catch (error) {
+        console.warn('Could not publish comment:', error);
+        return;
+      }
+    }
     setActiveCommentsItem((prev) => (prev ? { ...prev, comments: [newComment, ...prev.comments] } : null));
-
-    // Update inside sparks or feed
     setSparks((prev) =>
-      prev.map((s) => (s.id === activeCommentsItem.id ? { ...s, comments: [newComment, ...s.comments], commentsCount: s.commentsCount + 1 } : s))
+      prev.map((s) => (s.id === targetId ? { ...s, comments: [newComment, ...s.comments], commentsCount: s.commentsCount + 1 } : s))
     );
     setFeedPosts((prev) =>
-      prev.map((p) => (p.id === activeCommentsItem.id ? { ...p, comments: [newComment, ...p.comments], commentsCount: p.commentsCount + 1 } : p))
+      prev.map((p) => (p.id === targetId ? { ...p, comments: [newComment, ...p.comments], commentsCount: p.commentsCount + 1 } : p))
     );
   };
 
@@ -299,9 +414,38 @@ export default function App() {
     setCurrentMode('sparks');
   };
 
-  const handlePublishFeedPost = (newPost: FeedPost) => {
-    setFeedPosts((prev) => [newPost, ...prev]);
-    setCurrentMode('feed');
+  const handlePublishFeedPost = async (newPost: FeedPost, file?: File) => {
+    const session = auth.session;
+    if (!session?.user?.id) {
+      setFeedPosts((prev) => [newPost, ...prev]);
+      setCurrentMode('feed');
+      return;
+    }
+    const created = await createPost(session.user.id, session.access_token, {
+      caption: newPost.caption,
+      location: newPost.location,
+    });
+    try {
+      const mediaUrl = file
+        ? await uploadPostMedia(created.id, session.user.id, file, session.access_token)
+        : undefined;
+      setFeedPosts((prev) => [{
+        ...mapCorePost({ ...created, profiles: {
+          id: session.user.id,
+          handle: currentUser.handle.replace(/^@/, ''),
+          display_name: currentUser.name,
+          avatar_url: currentUser.avatar,
+          bio: currentUser.bio,
+          website_url: null,
+          created_at: created.created_at,
+          updated_at: created.updated_at,
+        }, media_url: mediaUrl, post_likes: [], post_saves: [], comments: [] }, currentUser),
+      }, ...prev]);
+      setCurrentMode('feed');
+    } catch (error) {
+      await deletePost(created.id, session.access_token).catch(() => undefined);
+      throw error;
+    }
   };
 
   const handlePublishCinemaVideo = (newVideo: CinemaVideo) => {
@@ -397,7 +541,7 @@ export default function App() {
             onNavigateToMessages={() => handleSelectMode('messages')}
             onToggleFollow={handleToggleFollow}
             followedUserIds={followedUserIds}
-            onUpdatePost={(postId, updates) => setFeedPosts((prev) => prev.map((post) => post.id === postId ? { ...post, ...updates } : post))}
+            onUpdatePost={handleUpdateFeedPost}
           />
         )}
 
