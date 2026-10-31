@@ -439,10 +439,10 @@ export const DirectMessages: React.FC<DirectMessagesProps> = ({
       )}
 
       {/* Main Container */}
-      <div className="bg-[#0d0f17] border border-slate-800/80 rounded-3xl overflow-hidden shadow-2xl h-[calc(100vh-140px)] min-h-[640px] max-h-[820px] grid grid-cols-1 md:grid-cols-12 relative">
+      <div className="dm-viewport min-h-0 bg-[#0d0f17] border border-slate-800/80 rounded-3xl overflow-hidden shadow-2xl grid grid-cols-1 md:grid-cols-12 relative">
         
         {/* ================= LEFT COLUMN: INBOX & THREADS ================= */}
-        <div className={`md:col-span-5 lg:col-span-4 border-r border-slate-800/80 flex flex-col h-full bg-[#0a0c12] ${
+        <div className={`md:col-span-5 lg:col-span-4 border-r border-slate-800/80 flex flex-col h-full min-h-0 bg-[#0a0c12] ${
           mobileView === 'chat' ? 'hidden md:flex' : 'flex'
         }`}>
           
@@ -718,7 +718,7 @@ export const DirectMessages: React.FC<DirectMessagesProps> = ({
 
         {/* ================= RIGHT COLUMN: ACTIVE CONVERSATION ================= */}
         {activeThread ? (
-          <div className={`md:col-span-7 lg:col-span-8 flex flex-col h-full bg-[#0d0f17] ${
+          <div className={`md:col-span-7 lg:col-span-8 flex flex-col h-full min-h-0 bg-[#0d0f17] ${
             mobileView === 'list' ? 'hidden md:flex' : 'flex'
           }`}>
             
